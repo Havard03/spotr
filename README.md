@@ -2,16 +2,16 @@
 <h1 align="center">Spot - A spotify tool for the terminal</h1>
 
 <p align="center">
- <a href="https://github.com/github_username/repo_name/graphs/contributors">
-  <img src="https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge"></a>
- <a href="https://github.com/github_username/repo_name/network/members">
-  <img src="https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge"></a>
- <a href="https://github.com/github_username/repo_name/stargazers">
-  <img src="https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge"></a>
- <a href="https://github.com/github_username/repo_name/issues">
-  <img src="https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge"></a>
- <a href="https://github.com/github_username/repo_name/blob/master/LICENSE.txt">
-  <img src="https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge"></a>
+ <a href="https://github.com/Havard03/spot/graphs/contributors">
+  <img src="https://img.shields.io/github/contributors/Havard03/spot.svg?style=for-the-badge"></a>
+ <a href="https://github.com/Havard03/spot/network/members">
+  <img src="https://img.shields.io/github/forks/Havard03/spot.svg?style=for-the-badge"></a>
+ <a href="https://github.com/Havard03/spot/stargazers">
+  <img src="https://img.shields.io/github/stars/Havard03/spot.svg?style=for-the-badge"></a>
+ <a href="https://github.com/Havard03/spot/issues">
+  <img src="https://img.shields.io/github/issues/Havard03/spot.svg?style=for-the-badge"></a>
+ <a href="https://github.com/Havard03/spot/blob/master/LICENSE.txt">
+  <img src="https://img.shields.io/github/license/Havard03/spot.svg?style=for-the-badge"></a>
 </p>
 
 <p align="center">
