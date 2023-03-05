@@ -1,0 +1,4 @@
+python-dotenv==1.0.0
+questionary==1.10.0
+requests==2.27.1
+rich==13.3.1

@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+
+from Router import Router
+from rich.console import Console
+import sys
+
+console = Console()
+route = Router()
+
+if len(sys.argv) < 2:
+    console.print("""[green]
+                  
+    ⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣶⣶⣶⣶⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀  [bold red]ARGUMENTS[/bold red] [ [bold yellow]*[/bold yellow] = Needs second argument ]
+    ⠀⠀⠀⠀⢀⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⡀⠀⠀⠀⠀  ---------------------------------------
+    ⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⠀⠀⠀  [bold white]Search[/bold white]      [bold yellow]*[/bold yellow] Search for a song on spotify
+    ⠀⢀⣾⣿⡿⠿⠛⠛⠛⠉⠉⠉⠉⠛⠛⠛⠿⠿⣿⣿⣿⣿⣿⣷⡀⠀  [bold white]Current[/bold white]     - Displays info for the current playing song
+    ⠀⣾⣿⣿⣇⠀⣀⣀⣠⣤⣤⣤⣤⣤⣀⣀⠀⠀⠀⠈⠙⠻⣿⣿⣷⠀  [bold white]Web[/bold white]         - Open currently playing track in a browser
+    ⢠⣿⣿⣿⣿⡿⠿⠟⠛⠛⠛⠛⠛⠛⠻⠿⢿⣿⣶⣤⣀⣠⣿⣿⣿⡄  [bold white]Queue[/bold white]       - Get a list over song in your current queue
+    ⢸⣿⣿⣿⣿⣇⣀⣀⣤⣤⣤⣤⣤⣄⣀⣀⠀⠀⠉⠛⢿⣿⣿⣿⣿⡇  [bold white]Album[/bold white]       [bold yellow]*[/bold yellow] Seach for albums on spotify
+    ⠘⣿⣿⣿⣿⣿⠿⠿⠛⠛⠛⠛⠛⠛⠿⠿⣿⣶⣦⣤⣾⣿⣿⣿⣿⠃  [bold white]Next[/bold white]        - Play next track
+    ⠀⢿⣿⣿⣿⣿⣤⣤⣤⣤⣶⣶⣦⣤⣤⣄⡀⠈⠙⣿⣿⣿⣿⣿⡿⠀  [bold white]Previous[/bold white]    - Play previous track
+    ⠀⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣾⣿⣿⣿⣿⡿⠁⠀  [bold white]Start[/bold white]       - Start playing
+    ⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀  [bold white]Stop[/bold white]        - Stop / Pause playing
+    ⠀⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠁⠀⠀⠀⠀  [bold white]Replay[/bold white]      - Replay / Restart currently playing track
+    ⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠛⠿⠿⠿⠿⠛⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀  [bold white]Recent[/bold white]      - Get a list of your recently played tracks
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Volume[/bold white]      - Set volume in precentage
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Shuffle[/bold white]     - Toggle shuffle on or off
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playlist[/bold white]    - Start playing one of your playlists
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playlistadd[/bold white] - Add currently playing song to one of your playlists
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playback[/bold white]    - Set playback state
+
+    """)
+    exit()
+
+elif(len(sys.argv) >= 2):
+    sys.argv[1] = sys.argv[1].lower()
+    
+    if (not sys.argv[1] in ['play', 'path', 'base_64','request','TOKEN','__class__','__delattr__','__dict__','__dir__','__doc__','__eq__','__format__','__ge__','__getattribute__','__gt__','__hash__','__init__','__init_subclass__','__le__','__lt__','__module__','__ne__','__new__','__reduce__','__reduce_ex__','__repr__','__setattr__','__sizeof__','__str__','__subclasshook__','__weakref__']):
+        try:
+            sys.argv[2]
+        except IndexError:
+            try:
+                getattr(route, sys.argv[1])()
+            except AttributeError:
+                console.log(f"[bold red]Invalid command - {sys.argv[1]}")
+            except TypeError:
+                console.log(f"[bold red]Command needs input argument(s) - {sys.argv[1]}")
+        else:
+            try:
+                getattr(route, sys.argv[1])(*sys.argv[2:])
+            except AttributeError:
+                console.log(f"[bold red]Invalid argument - {sys.argv[1]}")
+            except TypeError:
+                console.log(f"[bold red]Command doesnt take second argument - {sys.argv[1]}")
+    else:
+        console.log(f"[bold red]Invalid command - {sys.argv[1]}")
+            
