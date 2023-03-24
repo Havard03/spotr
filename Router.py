@@ -124,10 +124,10 @@ class Router(API, Helpers):
     def playlistadd(self):
         playlists = self.request('GET', "https://api.spotify.com/v1/me/playlists?limit=50")
         current_song = self.request('GET', "https://api.spotify.com/v1/me/player/currently-playing")
-        choices= self.parseAlbums(playlist['items'])
+        choices= self.parseAlbums(playlists['items'])
 
         answer = questionary.select(
-            "What playlist do you want to play?",
+            "what playlist do you want to add track to?",
             choices=choices,
             erase_when_done=True,
             use_arrow_keys=True,
