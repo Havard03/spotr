@@ -17,7 +17,7 @@ if not os.path.exists(PATH + '/key.txt'):
     
 #make spot file executable
 print("Making spot file executable...")
-os.system("chmod u+x " + PATH + '/spot')
+os.system("chmod u+x " + PATH + '/spotr')
 
 #install requirements
 print("Installing spot requirements...")
@@ -36,7 +36,7 @@ with open(PATH + '/.env', 'w') as f:
 
 #start authetication process
 print("Starting spotify authentication process...")
-os.system("./spot authorise")
+os.system("./spotr authorise")
 
 from rich.console import Console
 console = Console()
