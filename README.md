@@ -1,5 +1,5 @@
 
-<h1 align="center">Spot - A spotify tool for the terminal</h1>
+<h1 align="center">Spotr - A spotify tool for the terminal</h1>
 
 <p align="center">
  <a href="https://github.com/Havard03/spot/graphs/contributors">
