@@ -2,16 +2,16 @@
 <h1 align="center">Spotr - A spotify tool for the terminal</h1>
 
 <p align="center">
- <a href="https://github.com/Havard03/spot/graphs/contributors">
-  <img src="https://img.shields.io/github/contributors/Havard03/spot.svg?style=for-the-badge"></a>
- <a href="https://github.com/Havard03/spot/network/members">
-  <img src="https://img.shields.io/github/forks/Havard03/spot.svg?style=for-the-badge"></a>
- <a href="https://github.com/Havard03/spot/stargazers">
-  <img src="https://img.shields.io/github/stars/Havard03/spot.svg?style=for-the-badge"></a>
- <a href="https://github.com/Havard03/spot/issues">
-  <img src="https://img.shields.io/github/issues/Havard03/spot.svg?style=for-the-badge"></a>
- <a href="https://github.com/Havard03/spot/blob/master/LICENSE.txt">
-  <img src="https://img.shields.io/github/license/Havard03/spot.svg?style=for-the-badge"></a>
+ <a href="https://github.com/Havard03/spotr/graphs/contributors">
+  <img src="https://img.shields.io/github/contributors/Havard03/spotr.svg?style=for-the-badge"></a>
+ <a href="https://github.com/Havard03/spotr/network/members">
+  <img src="https://img.shields.io/github/forks/Havard03/spotr.svg?style=for-the-badge"></a>
+ <a href="https://github.com/Havard03/spotr/stargazers">
+  <img src="https://img.shields.io/github/stars/Havard03/spotr.svg?style=for-the-badge"></a>
+ <a href="https://github.com/Havard03/spotr/issues">
+  <img src="https://img.shields.io/github/issues/Havard03/spotr.svg?style=for-the-badge"></a>
+ <a href="https://github.com/Havard03/spotr/blob/master/LICENSE.txt">
+  <img src="https://img.shields.io/github/license/Havard03/spotr.svg?style=for-the-badge"></a>
 </p>
 
 <p align="center">
@@ -35,7 +35,7 @@ Made in python for simplicity
 
 4. Follow instructions in script
 
-5. Run spot in terminal and enjoy
+5. Run spotr in terminal and enjoy
 
 </p>
 
@@ -44,7 +44,7 @@ Made in python for simplicity
 
 1. Clone repo to your computer and cd into folder
 
-2. Make .spot file executable "chmod u+x spot"
+2. Make .spotr file executable "chmod u+x spotr"
 
 3. Register an app in spotify for developers "https://developer.spotify.com/dashboard/applications" (also set callback URI to "https://www.google.com/")
 
@@ -54,9 +54,9 @@ Made in python for simplicity
 
 6. Follow the steps and check that all relevant data was written to .env file
 
-7. Add current folder to PATH so the spot file is excecutable everywhere
+7. Add current folder to PATH so the spotr file is excecutable everywhere
 
-9. Run spot in terminal and enjoy
+9. Run spotr in terminal and enjoy
 
 </p>
 
