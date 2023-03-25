@@ -50,7 +50,7 @@ Made in python for simplicity
 
 4. Install project requirements: pip3 install -r requirements.txt
 
-5. Run "spot authorise" command in terminal and enter keys from the registered spotify app
+5. Run "spotr authorise" command in terminal and enter keys from the registered spotify app
 
 6. Follow the steps and check that all relevant data was written to .env file
 
@@ -95,7 +95,7 @@ Authorise   - Manually start authorisation processs <br>
 
 You can easily create your own commands and scripts by adding a function in router.py
 
-As soon as the function is created and saved you can run it on the terminal with (spot function-name)
+As soon as the function is created and saved you can run it on the terminal with (spotr function-name)
 
 <h4>I recommend going to spotifys <a href="https://developer.spotify.com/console/">API documentation</a> to get a grasp of what is possible</h4>
 
