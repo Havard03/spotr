@@ -1,9 +1,14 @@
 from dotenv import load_dotenv, find_dotenv
-from rich.console import Console
-import subprocess, webbrowser, base64, os, requests, time
+from rich.logging import RichHandler
+import subprocess, webbrowser, base64, os, requests, time, logging
 
 load_dotenv(find_dotenv())
-console = Console()
+log = logging.getLogger();
+
+if (os.environ["debug"] == "True"):
+    logging.basicConfig(level="NOTSET", format="%(message)s", datefmt="[%X]", handlers=[RichHandler(markup=True, rich_tracebacks=True)])
+else: 
+    logging.basicConfig(level="INFO", datefmt="[%X]", format="%(message)s", handlers=[RichHandler(markup=True)])
 
 class API():
 
@@ -14,23 +19,24 @@ class API():
             self.base_64 = os.environ["base_64"]
             with open(os.environ["project_path"]+"key.txt") as file: self.TOKEN = file.read()
         except KeyError:
-            console.log("[bold red]Enviorment-Variables are not set!")
+            log.critical("[bold red]Enviorment-Variables are not set!")
+            log.exception("[bold blue]Try running the authorise command") if os.environ["debug"] == "True" else log.info("[bold blue]Try running the authorise command")
             pass
 
-    def request(self, TYPE, URL, HEADERS=None, json=None):
-        if HEADERS is None: HEADERS = {"Authorization": f"Bearer {self.TOKEN}"}
+    def request(self, type, url, headers=None, json=None):
+        if headers is None: headers = {"Authorization": f"Bearer {self.TOKEN}"}
 
-        response = requests.request(TYPE, URL, headers=HEADERS, json=json)
+        response = requests.request(type, url, headers=headers, json=json)
         
         if (response.status_code == 401 or response.status_code == 400):
             self.refresh_key()
             with open(os.environ["project_path"]+"key.txt") as file: self.TOKEN = file.read()
-            HEADERS = {"Authorization": f"Bearer {self.TOKEN}"}
-            response = requests.request(TYPE, URL, headers=HEADERS, json=json)
+            headers = {"Authorization": f"Bearer {self.TOKEN}"}
+            response = requests.request(type, url, headers=headers, json=json)
 
         if (not response.ok):
-            console.log(response.json())
-            console.log(f"# [bold red]request error | status-code: {response.status_code}")
+            log.warning(f"[bold red]request error | status-code: {response.status_code}")
+            log.info(response.json())
             exit()
 
         try:
@@ -49,8 +55,8 @@ class API():
         )
 
         if (not response.ok): 
-            console.log(f"# [bold red]request error | status-code: {response.status_code}")
-            console.log("# [bold green]Most likely something wrong with base_64 or refresh_token, try running '[bold red]spot auth[/bold red]'")
+            log.warning(f"[bold red]request error | status-code: {response.status_code}")
+            log.info("[bold blue]Most likely something wrong with base_64 or refresh_token, try running [bold green]spotr authorise[/bold green]")
             exit()
 
         data = response.json()
@@ -75,7 +81,7 @@ class API():
             'scope': 'playlist-read-collaborative playlist-read-private user-read-playback-state user-modify-playback-state user-read-currently-playing user-read-recently-played playlist-modify-private playlist-modify-public',
         })
 
-        console.print(f'URL will open in 5 seconds, Accept the terms, Copy the code in the redirected URL, Then paste the code into the terminal')
+        log.info(f'URL will open in 5 seconds, Accept the terms, Copy the code in the redirected URL, Then paste the code into the terminal')
         time.sleep(5)
         webbrowser.open_new_tab(auth_request.url)
         
@@ -97,7 +103,7 @@ class API():
         access_token_request = requests.post(url=TOKEN_URL, data=payload, headers=headers)
 
         if (not access_token_request.ok):
-            console.log(f"Request error: {access_token_request.status_code}")
+            log.warning(f"Request error: {access_token_request.status_code}")
             exit()
 
         access_token_response_data = access_token_request.json()
@@ -110,6 +116,7 @@ class API():
             project_path="{self.path}"
             refresh_token="{access_token_response_data['refresh_token']}"
             base_64="{client_creds_b64.decode()}"
+            debug="False"
             """.replace(" ",  "")
 
             with open(self.path + ".env", "w") as f:
@@ -123,14 +130,15 @@ class API():
                 exit()
 
             if not os.path.exists(PATH + "/.env") or os.path.exists(PATH + "/key.txt"):
-                os.system("touch " + PATH + "/.env")
-                os.system("touch " + PATH + "/key.txt")
+                open(PATH + '/key.txt', "w").close()
+                open(PATH + '/.env', "w").close()
 
             env_data = f"""
             #Enviorment-variables
             project_path="{PATH}/"
             refresh_token="{access_token_response_data["refresh_token"]}"
             base_64="{client_creds_b64.decode()}"
+            debug="False"
             """.replace(" ",  "")
 
             with open(PATH + "/.env", "w") as f:
