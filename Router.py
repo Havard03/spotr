@@ -36,8 +36,8 @@ class Router(API, Helpers):
         self.request('PUT', "https://api.spotify.com/v1/me/player/seek?position_ms=0")
         return
     
-    def play(self, JSON=None):
-        self.request('PUT', "https://api.spotify.com/v1/me/player/play", json=JSON)
+    def play(self, json=None):
+        self.request('PUT', "https://api.spotify.com/v1/me/player/play", json=json)
         return
 
     def web(self):
@@ -58,7 +58,7 @@ class Router(API, Helpers):
 
     def playback(self):
         state = questionary.select("Choose a play state", choices=['track', 'context', 'off'], erase_when_done=True, use_shortcuts=True).ask()
-        if answer is None: return
+        if state is None: return
         self.request('PUT', f"https://api.spotify.com/v1/me/player/repeat?state={state}")
         return
 
@@ -87,7 +87,7 @@ class Router(API, Helpers):
                 JSON = {
                     "uris": [track['track']['uri']]
                 }
-                self.play(JSON=JSON)
+                self.play(json=JSON)
                 time.sleep(0.5)
                 self.current()
                 return
@@ -115,7 +115,7 @@ class Router(API, Helpers):
                         "position": "0"
                     }
                 }
-                self.play(JSON=JSON)
+                self.play(json=JSON)
                 time.sleep(0.5)
                 self.current()
                 return
@@ -163,7 +163,7 @@ class Router(API, Helpers):
                 JSON = {
                     "uris": [track['uri']]
                 }
-                self.play(JSON=JSON)
+                self.play(json=JSON)
                 time.sleep(0.5)
                 self.current()
                 return        
@@ -193,7 +193,7 @@ class Router(API, Helpers):
                         "position": "0"
                     }
                 }
-                self.play(JSON=JSON)
+                self.play(json=JSON)
                 time.sleep(0.5)
                 self.current()
                 return        
@@ -225,7 +225,7 @@ class Router(API, Helpers):
             }
         }
 
-        self.play(JSON=JSON)
+        self.play(json=JSON)
         time.sleep(0.5)
         self.current()
         return
@@ -236,7 +236,6 @@ class Router(API, Helpers):
         if data == None:
             console.log("[bold red]No data")
             return
-        
         if data['item'] == None:
             self.current()
             return

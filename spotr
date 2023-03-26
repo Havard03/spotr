@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 
+import os
+import sys
+import logging
 from Router import Router
 from rich.console import Console
-import sys
+from rich.logging import RichHandler
+from dotenv import load_dotenv, find_dotenv
 
-console = Console()
 route = Router()
+console = Console()
+load_dotenv(find_dotenv())
+log = logging.getLogger();
+logging.basicConfig(level="NOTSET", format="%(message)s", datefmt="[%X]", handlers=[RichHandler(markup=True, rich_tracebacks=True)])
+
 
 if len(sys.argv) < 2:
     console.print("""[green]
@@ -43,16 +51,17 @@ elif(len(sys.argv) >= 2):
             try:
                 getattr(route, sys.argv[1])()
             except AttributeError:
-                console.log(f"[bold red]Invalid command - {sys.argv[1]}")
+                log.exception(f"[bold red]Invalid command - {sys.argv[1]}") if os.environ["debug"] == "True" else log.error(f"[bold red]Invalid command - {sys.argv[1]}")
             except TypeError:
-                console.log(f"[bold red]Command needs input argument(s) - {sys.argv[1]}")
+                log.exception(f"[bold red]Command needs input argument(s) - {sys.argv[1]}") if os.environ["debug"] == "True" else log.error(f"[bold red]Command needs input argument(s)")
+                
         else:
             try:
                 getattr(route, sys.argv[1])(*sys.argv[2:])
             except AttributeError:
-                console.log(f"[bold red]Invalid argument - {sys.argv[1]}")
+                log.exception(f"[bold red]Invalid argument - {sys.argv[1]}") if os.environ["debug"] == "True" else log.error(f"[bold red]Invalid argument")
             except TypeError:
-                console.log(f"[bold red]Command doesnt take second argument - {sys.argv[1]}")
+                log.exception(f"[bold red]Invalid Command doesnt take second argument - {sys.argv[1]}") if os.environ["debug"] == "True" else log.error(f"[bold red]Command doesnt take second argument")
     else:
-        console.log(f"[bold red]Invalid command - {sys.argv[1]}")
+        log.exception(f"[bold red]Invalid command - {sys.argv[1]}") if os.environ["debug"] == "True" else log.error(f"[bold red]Invalid command")
             
