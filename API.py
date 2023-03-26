@@ -56,7 +56,7 @@ class API():
 
         if (not response.ok): 
             log.warning(f"[bold red]request error | status-code: {response.status_code}")
-            log.info("[bold blue]Most likely something wrong with base_64 or refresh_token, try running '[bold red]spotr auth[/bold red]'")
+            log.info("[bold blue]Most likely something wrong with base_64 or refresh_token, try running [bold green]spotr authorise[/bold green]")
             exit()
 
         data = response.json()

@@ -17,7 +17,7 @@ if not os.path.exists(PATH + '/key.txt'):
     
 #make spot file executable
 print("Making spot file executable...")
-subprocess.check_call(['chmod','u+x', PATH+"/spotr"])
+subprocess.run(['chmod','u+x', PATH+"/spotr"])
 
 #install requirements
 print("Installing spot requirements...")
@@ -28,6 +28,8 @@ print("Writing template data to .env...")
 env_data = f"""
 #Enviorment-variables
 project_path="{PATH}/"
+refresh_token=""
+base_64=""
 debug="False"
 """.replace(" ", "")
 with open(PATH + '/.env', 'w') as f:
