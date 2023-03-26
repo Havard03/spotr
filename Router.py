@@ -106,7 +106,7 @@ class Router(API, Helpers):
         data = self.request(
             "GET", "https://api.spotify.com/v1/me/player/recently-played?limit=36"
         )
-        choices = self.parse_tracks(data["items"])
+        choices = self.parse_tracks(data["items"], key="track")
 
         answer = questionary.select(
             "What song do you want to play?",

@@ -38,7 +38,7 @@ class API:
             self.path = os.environ["project_path"]
             self.refresh_token = os.environ["refresh_token"]
             self.base_64 = os.environ["base_64"]
-            with open(os.environ["project_path"] + "key.txt", encoding="utf-8") as file:
+            with open(os.path.join(self.path, "key.txt"), encoding="utf-8") as file:
                 self.TOKEN = file.read()
         except KeyError:
             log.critical("[bold red]Enviorment-Variables are not set!")
@@ -57,7 +57,7 @@ class API:
 
         if response.status_code in (401, 400):
             self.refresh_key()
-            with open(os.environ["project_path"] + "key.txt", encoding="utf-8") as file:
+            with open(os.path.join(os.environ["project_path"], "key.txt"), encoding="utf-8") as file:
                 self.TOKEN = file.read()
             headers = {"Authorization": f"Bearer {self.TOKEN}"}
             response = requests.request(
@@ -101,7 +101,7 @@ class API:
 
         data = response.json()
 
-        with open(self.path + "key.txt", "w", encoding="utf-8") as f:
+        with open(os.path.join(self.path, "key.txt"), "w", encoding="utf-8") as f:
             f.write(data["access_token"])
             f.close()
 
@@ -166,10 +166,10 @@ class API:
                 " ", ""
             )
 
-            with open(self.path + ".env", "w", encoding="utf-8") as f:
+            with open(os.path.join(self.path, ".env"), "w", encoding="utf-8") as f:
                 f.write(env_data)
 
-        except ValueError:
+        except AttributeError:
             path = os.path.dirname(__file__)
 
             check_path = str(
@@ -182,9 +182,9 @@ class API:
             if check_path.lower() != "y":
                 sys.exit()
 
-            if not os.path.exists(path + "/.env") or os.path.exists(path + "/key.txt"):
-                open(path + "/key.txt", "w", encoding="utf-8").close()
-                open(path + "/.env", "w", encoding="utf-8").close()
+            if not os.path.exists(os.path.join(path, ".env")) or os.path.exists(os.path.join(path, "key.txt")):
+                open(os.path.join(path, "key.txt"), "w", encoding="utf-8").close()
+                open(os.path.join(path, ".env"), "w", encoding="utf-8").close()
 
             env_data = f"""
             #Environmental-variables
@@ -196,5 +196,5 @@ class API:
                 " ", ""
             )
 
-            with open(path + "/.env", "w", encoding="utf-8") as f:
+            with open(os.path.join(path, ".env"), "w", encoding="utf-8") as f:
                 f.write(env_data)

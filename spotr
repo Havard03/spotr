@@ -55,6 +55,8 @@ elif len(sys.argv) >= 2:
     sys.argv[1] = sys.argv[1].lower()
 
     if not sys.argv[1] in [
+        "parse_tracks",
+        "parse_albums",
         "play",
         "path",
         "base_64",
@@ -111,7 +113,10 @@ elif len(sys.argv) >= 2:
                         sys.argv[1],
                     )
                     if bool(os.environ["DEBUG"])
-                    else log.error("[bold red]Command needs input argument(s)")
+                    else log.error(
+                        "[bold red]Command needs input argument(s) - %s",
+                        sys.argv[1],
+                    )
                 )
         else:
             try:
@@ -132,7 +137,10 @@ elif len(sys.argv) >= 2:
                         sys.argv[1],
                     )
                     if bool(os.environ["DEBUG"])
-                    else log.error("[bold red]Command doesnt take second argument")
+                    else log.error(
+                        "[bold red]Command doesnt take second argument - %s",
+                        sys.argv[1],
+                    )
                 )
     else:
         ERROR: bool = (
@@ -141,5 +149,8 @@ elif len(sys.argv) >= 2:
                 sys.argv[1],
             )
             if bool(os.environ["DEBUG"])
-            else log.error("[bold red]Invalid command")
+            else log.error(
+                "[bold red]Invalid command - %s",
+                sys.argv[1],
+            )
         )
