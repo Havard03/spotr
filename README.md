@@ -90,6 +90,11 @@ Album       - Search for albums on spotify <br>
 Refresh     - Manually refresh spotify api token <br>
 Authorise   - Manually start authorisation processs <br>
 
+<h1 align="center" style="border-bottom: none">Debug mode</h1>
+<p align="center">Simply change debug in .env file to enable debug mode (debug="True")</p>
+
+<img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/227784156-e1b56954-446b-4c13-9222-f82c4c71f5ce.gif">
+
 <h1 align="center" style="border-bottom: none">Modifications</h1>
 <p>
 
