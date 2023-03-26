@@ -1,22 +1,31 @@
 #!/usr/bin/env python3
+""" Spotr """
 
+import logging
 import os
 import sys
-import logging
-from Router import Router
+
+from dotenv import find_dotenv, load_dotenv
 from rich.console import Console
 from rich.logging import RichHandler
-from dotenv import load_dotenv, find_dotenv
+
+from Router import Router
 
 route = Router()
 console = Console()
 load_dotenv(find_dotenv())
-log = logging.getLogger();
-logging.basicConfig(level="NOTSET", format="%(message)s", datefmt="[%X]", handlers=[RichHandler(markup=True, rich_tracebacks=True)])
+log = logging.getLogger()
+logging.basicConfig(
+    level="NOTSET",
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(markup=True, rich_tracebacks=True)],
+)
 
 
 if len(sys.argv) < 2:
-    console.print("""[green]
+    console.print(
+        """[green]
                   
     ⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣶⣶⣶⣶⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀  [bold red]ARGUMENTS[/bold red] [ [bold yellow]*[/bold yellow] = Needs second argument ]
     ⠀⠀⠀⠀⢀⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⡀⠀⠀⠀⠀  ---------------------------------------
@@ -38,30 +47,99 @@ if len(sys.argv) < 2:
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playlistadd[/bold white] - Add currently playing song to one of your playlists
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Suprise[/bold white]     - Play recommended song based on recently played tracks
 
-    """)
-    exit()
+    """
+    )
+    sys.exit()
 
-elif(len(sys.argv) >= 2):
+elif len(sys.argv) >= 2:
     sys.argv[1] = sys.argv[1].lower()
-    
-    if (not sys.argv[1] in ['play', 'path', 'base_64','request','TOKEN','__class__','__delattr__','__dict__','__dir__','__doc__','__eq__','__format__','__ge__','__getattribute__','__gt__','__hash__','__init__','__init_subclass__','__le__','__lt__','__module__','__ne__','__new__','__reduce__','__reduce_ex__','__repr__','__setattr__','__sizeof__','__str__','__subclasshook__','__weakref__']):
+
+    if not sys.argv[1] in [
+        "play",
+        "path",
+        "base_64",
+        "request",
+        "TOKEN",
+        "__class__",
+        "__delattr__",
+        "__dict__",
+        "__dir__",
+        "__doc__",
+        "__eq__",
+        "__format__",
+        "__ge__",
+        "__getattribute__",
+        "__gt__",
+        "__hash__",
+        "__init__",
+        "__init_subclass__",
+        "__le__",
+        "__lt__",
+        "__module__",
+        "__ne__",
+        "__new__",
+        "__reduce__",
+        "__reduce_ex__",
+        "__repr__",
+        "__setattr__",
+        "__sizeof__",
+        "__str__",
+        "__subclasshook__",
+        "__weakref__",
+    ]:
         try:
             sys.argv[2]
         except IndexError:
             try:
                 getattr(route, sys.argv[1])()
             except AttributeError:
-                log.exception(f"[bold red]Invalid command - {sys.argv[1]}") if os.environ["debug"] == "True" else log.error(f"[bold red]Invalid command - {sys.argv[1]}")
+                ERROR: bool = (
+                    log.exception(
+                        "[bold red]Invalid command - %s",
+                        sys.argv[1],
+                    )
+                    if bool(os.environ["DEBUG"])
+                    else log.error(
+                        "[bold red]Invalid command - %s",
+                        sys.argv[1],
+                    )
+                )
             except TypeError:
-                log.exception(f"[bold red]Command needs input argument(s) - {sys.argv[1]}") if os.environ["debug"] == "True" else log.error(f"[bold red]Command needs input argument(s)")
-                
+                ERROR: bool = (
+                    log.exception(
+                        "[bold red]Command needs input argument(s) - %s",
+                        sys.argv[1],
+                    )
+                    if bool(os.environ["DEBUG"])
+                    else log.error("[bold red]Command needs input argument(s)")
+                )
         else:
             try:
                 getattr(route, sys.argv[1])(*sys.argv[2:])
             except AttributeError:
-                log.exception(f"[bold red]Invalid argument - {sys.argv[1]}") if os.environ["debug"] == "True" else log.error(f"[bold red]Invalid argument")
+                ERROR: bool = (
+                    log.exception(
+                        "[bold red]Invalid argument - %s",
+                        sys.argv[1],
+                    )
+                    if bool(os.environ["DEBUG"])
+                    else log.error("[bold red]Invalid argument")
+                )
             except TypeError:
-                log.exception(f"[bold red]Invalid Command doesnt take second argument - {sys.argv[1]}") if os.environ["debug"] == "True" else log.error(f"[bold red]Command doesnt take second argument")
+                ERROR: bool = (
+                    log.exception(
+                        "[bold red]Command doesnt take second argument - %s",
+                        sys.argv[1],
+                    )
+                    if bool(os.environ["DEBUG"])
+                    else log.error("[bold red]Command doesnt take second argument")
+                )
     else:
-        log.exception(f"[bold red]Invalid command - {sys.argv[1]}") if os.environ["debug"] == "True" else log.error(f"[bold red]Invalid command")
-            
+        ERROR: bool = (
+            log.exception(
+                "[bold red]Invalid command - %s",
+                sys.argv[1],
+            )
+            if bool(os.environ["DEBUG"])
+            else log.error("[bold red]Invalid command")
+        )
