@@ -52,9 +52,11 @@ with open(os.path.join(PATH, ".env"), "w", encoding="utf-8") as f:
 print("Starting spotify authentication process...")
 subprocess.run(["./spotr", "authorise"], check=True)
 
+print("======================================")
 print(
     "---Add this folder to your PATH if you wish to execute spot commands anywhere---"
 )
 print(
-    f"---This can be adding the following to your .rc file ([bold white]export PATH=$PATH:{PATH}---)"
+    f"---This can be done by adding the following to your .rc file ([bold white]export PATH=$PATH:{PATH}---)"
 )
+print("======================================")
