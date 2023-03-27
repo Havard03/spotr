@@ -16,12 +16,13 @@ from yarl import URL
 load_dotenv(find_dotenv())
 log = logging.getLogger()
 
-
+""" Base - URL """
 ACCOUNT_URL = URL.build(
     scheme="https",
-    host="accounts.spotify.com",
+    host="accounts.spotify.com"
 )
 
+""" Logging """
 if eval(os.environ["DEBUG"]):
     logging.basicConfig(
         level="NOTSET",
