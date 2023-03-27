@@ -20,7 +20,7 @@ A very simple CLI for controlling your spotify on the fly in the terminal.
 Made in python for simplicity
 </p>
 
-<img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/222960986-0a067490-f067-4305-abff-02245ae4ca50.gif">
+<img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/228016062-60718528-212a-49c9-ac3d-c81bb43d3278.gif">
 
 <h1 align="center" style="border-bottom: none">Installation</h1>
 
@@ -62,7 +62,7 @@ Made in python for simplicity
 
 <h1 align="center" style="border-bottom: none">Built-in Commands</h1>
 
-<img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/222961027-2be23843-f9ca-4ec8-afae-db464928e414.gif">
+<img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/228016178-f64c5866-4f84-4246-8c1f-97569baaf802.gif">
 
 <h2>Main commands</h2>
 
