@@ -4,8 +4,10 @@ import time
 import webbrowser
 
 import questionary
+import yarl
 from dotenv import find_dotenv, load_dotenv
 from rich.console import Console
+from yarl import URL
 
 from API import API
 from Helpers import Helpers
@@ -13,44 +15,62 @@ from Helpers import Helpers
 console = Console()
 load_dotenv(find_dotenv())
 
+""" URL - Variables """
+SPOTIFY_LIMIT = 50
+QUSTIONARY_LIMIT = 36
+API_BASE = yarl.URL("api.spotify.com")
+API_VERSION = yarl.URL("/v1")
+
+""" BASE - URLs """
+API_PLAYER = URL.build(
+    scheme="https", 
+    host=str(API_BASE), 
+    path=str(URL(API_VERSION / "me/player"))
+)
+API_BASE_VERSION = URL.build(
+    scheme="https", 
+    host=str(API_BASE), 
+    path=str(URL(API_VERSION))
+)
+
 
 class Router(API, Helpers):
     """Available Spotr commands"""
-    
+
     def refresh(self):
         """Refresh API key"""
         self.refresh_key()
 
     def next(self):
         """Play next track"""
-        self.request("POST", "https://api.spotify.com/v1/me/player/next")
+        self.request("POST", str(URL(API_PLAYER / "next")))
         self.current()
 
     def previous(self):
         """Play previous track"""
-        self.request("POST", "https://api.spotify.com/v1/me/player/previous")
+        self.request("POST", str(URL(API_PLAYER / "previous")))
 
     def stop(self):
         """Stop/Pause playing"""
-        self.request("PUT", "https://api.spotify.com/v1/me/player/pause")
+        self.request("PUT", str(URL(API_PLAYER / "pause")))
 
     def start(self):
         """Start/Resume playing"""
-        self.request("PUT", "https://api.spotify.com/v1/me/player/play")
+        self.request("PUT", str(URL(API_PLAYER / "play")))
 
     def replay(self):
         """Replay/Restart currently playing song"""
-        self.request("PUT", "https://api.spotify.com/v1/me/player/seek?position_ms=0")
+        self.request(
+            "PUT", str(URL(API_PLAYER / "seek").with_query({"position_ms": 0}))
+        )
 
     def play(self, json=None):
         """Play song or collection of songs"""
-        self.request("PUT", "https://api.spotify.com/v1/me/player/play", json=json)
+        self.request("PUT", str(URL(API_PLAYER / "play")), json=json)
 
     def web(self):
         """Open currently playing song in a broswer"""
-        data = self.request(
-            "GET", "https://api.spotify.com/v1/me/player/currently-playing"
-        )
+        data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
         if data is None:
             return
         webbrowser.open_new_tab(data["item"]["external_urls"]["spotify"])
@@ -64,7 +84,7 @@ class Router(API, Helpers):
             use_shortcuts=True,
         ).ask()
         self.request(
-            "PUT", f"https://api.spotify.com/v1/me/player/shuffle?state={state}"
+            "PUT", str(URL(API_PLAYER / "shuffle").with_query({"state": state}))
         )
 
     def volume(self):
@@ -77,7 +97,11 @@ class Router(API, Helpers):
         ).ask()
         self.request(
             "PUT",
-            f"https://api.spotify.com/v1/me/player/volume?volume_percent={volume.replace('%', '')}",
+            str(
+                URL(API_PLAYER / "volume").with_query(
+                    {"volume_percent": volume.replace("%", "")}
+                )
+            ),
         )
 
     def playback(self):
@@ -91,20 +115,25 @@ class Router(API, Helpers):
         if state is None:
             return
         self.request(
-            "PUT", f"https://api.spotify.com/v1/me/player/repeat?state={state}"
+            "PUT", str(URL(API_PLAYER / "repeat").with_query({"state": state}))
         )
         return
 
     def queue(self):
         """Get Queue"""
-        data = self.request("GET", "https://api.spotify.com/v1/me/player/queue")
+        data = self.request("GET", str(URL(API_PLAYER / "queue")))
         for track in data["queue"]:
             console.print(f"[bold green]{track['name']}")
 
     def recent(self):
         """Get recently played tracks"""
         data = self.request(
-            "GET", "https://api.spotify.com/v1/me/player/recently-played?limit=36"
+            "GET",
+            str(
+                URL(API_PLAYER / "recently-played").with_query(
+                    {"limit": QUSTIONARY_LIMIT}
+                )
+            ),
         )
         choices = self.parse_tracks(data["items"], key="track")
 
@@ -130,7 +159,14 @@ class Router(API, Helpers):
 
     def playlist(self):
         """Choose a playlist"""
-        data = self.request("GET", "https://api.spotify.com/v1/me/playlists?limit=50")
+        data = self.request(
+            "GET",
+            str(
+                URL(API_BASE_VERSION / "me/playlists").with_query(
+                    {"limit": SPOTIFY_LIMIT}
+                )
+            ),
+        )
         choices = self.parse_albums(data["items"])
 
         answer = questionary.select(
@@ -155,11 +191,14 @@ class Router(API, Helpers):
         """Add currently plating track to playlist"""
 
         playlists = self.request(
-            "GET", "https://api.spotify.com/v1/me/playlists?limit=50"
+            "GET",
+            str(
+                URL(API_BASE_VERSION / "me/playlists").with_query(
+                    {"limit": SPOTIFY_LIMIT}
+                )
+            ),
         )
-        current_song = self.request(
-            "GET", "https://api.spotify.com/v1/me/player/currently-playing"
-        )
+        current_song = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
         choices = self.parse_albums(playlists["items"])
 
         answer = questionary.select(
@@ -176,7 +215,11 @@ class Router(API, Helpers):
             if playlist["name"] == answer:
                 self.request(
                     "POST",
-                    f"https://api.spotify.com/v1/playlists/{playlist['id']}/tracks?uris={current_song['item']['uri']}",
+                    str(
+                        URL(
+                            API_BASE_VERSION / "playlists" / playlist["id"] / "tracks"
+                        ).with_query({"uris": current_song["item"]["uri"]})
+                    ),
                 )
                 console.print(
                     f"{current_song['item']['name']} was added to [bold green]{playlist['name']}"
@@ -189,7 +232,11 @@ class Router(API, Helpers):
             raise TypeError
         data = self.request(
             "GET",
-            f"https://api.spotify.com/v1/search?q={' '.join(query)}&type=track&limit=36",
+            str(
+                URL(API_BASE_VERSION / "search").with_query(
+                    {"q": " ".join(query), "type": "track", "limit": QUSTIONARY_LIMIT}
+                )
+            ),
         )
         choices = self.parse_tracks(data["tracks"]["items"])
 
@@ -219,7 +266,11 @@ class Router(API, Helpers):
             raise TypeError
         data = self.request(
             "GET",
-            f"https://api.spotify.com/v1/search?q={' '.join(query)}&type=album&limit=36",
+            str(
+                URL(API_BASE_VERSION / "search").with_query(
+                    {"q": " ".join(query), "type": "album", "limit": QUSTIONARY_LIMIT}
+                )
+            ),
         )
         choices = self.parse_tracks(data["albums"]["items"])
 
@@ -246,7 +297,7 @@ class Router(API, Helpers):
     def suprise(self):
         """Play random / recommended track based on recent tracks"""
         recent = self.request(
-            "GET", "https://api.spotify.com/v1/me/player/recently-played?limit=5"
+            "GET", str(URL(API_PLAYER / "recently-played").with_query({"limit": 5}))
         )
 
         seed_arists = []
@@ -257,12 +308,18 @@ class Router(API, Helpers):
             seed_tracks.append(track["track"]["id"])
             seed_arists.append(track["track"]["artists"][0]["id"])
 
-        query = f"seed_arists={','.join(seed_arists)}"
-        query += f"&seed_generes={','.join(seed_generes)}"
-        query += f"&seed_tracks={','.join(seed_tracks)}"
-
         recommended = self.request(
-            "GET", f"https://api.spotify.com/v1/recommendations?{query}&limit=5"
+            "GET",
+            str(
+                URL(API_BASE_VERSION / "recommendations").with_query(
+                    {
+                        "seed_arists": ",".join(seed_arists),
+                        "seed_generes": ",".join(seed_generes),
+                        "seed_tracks": ",".join(seed_tracks),
+                        "limit": 5,
+                    }
+                )
+            ),
         )
         results = []
         for track in recommended["tracks"]:
@@ -275,9 +332,7 @@ class Router(API, Helpers):
 
     def current(self):
         """Display information about current track"""
-        data = self.request(
-            "GET", "https://api.spotify.com/v1/me/player/currently-playing"
-        )
+        data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
 
         if data is None:
             console.log("[bold red]No data")

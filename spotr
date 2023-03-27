@@ -95,24 +95,24 @@ elif len(sys.argv) >= 2:
             try:
                 getattr(route, sys.argv[1])()
             except AttributeError:
-                ERROR: bool = (
+                ERROR: log = (
                     log.exception(
                         "[bold red]Invalid command - %s",
                         sys.argv[1],
                     )
-                    if bool(os.environ["DEBUG"])
+                    if eval(os.environ["DEBUG"])
                     else log.error(
                         "[bold red]Invalid command - %s",
                         sys.argv[1],
                     )
                 )
             except TypeError:
-                ERROR: bool = (
+                ERROR: log = (
                     log.exception(
                         "[bold red]Command needs input argument(s) - %s",
                         sys.argv[1],
                     )
-                    if bool(os.environ["DEBUG"])
+                    if eval(os.environ["DEBUG"])
                     else log.error(
                         "[bold red]Command needs input argument(s) - %s",
                         sys.argv[1],
@@ -122,33 +122,33 @@ elif len(sys.argv) >= 2:
             try:
                 getattr(route, sys.argv[1])(*sys.argv[2:])
             except AttributeError:
-                ERROR: bool = (
+                ERROR: log = (
                     log.exception(
                         "[bold red]Invalid argument - %s",
                         sys.argv[1],
                     )
-                    if bool(os.environ["DEBUG"])
+                    if eval(os.environ["DEBUG"])
                     else log.error("[bold red]Invalid argument")
                 )
             except TypeError:
-                ERROR: bool = (
+                ERROR: log = (
                     log.exception(
                         "[bold red]Command doesnt take second argument - %s",
                         sys.argv[1],
                     )
-                    if bool(os.environ["DEBUG"])
+                    if eval(os.environ["DEBUG"])
                     else log.error(
                         "[bold red]Command doesnt take second argument - %s",
                         sys.argv[1],
                     )
                 )
     else:
-        ERROR: bool = (
+        ERROR: log = (
             log.exception(
                 "[bold red]Invalid command - %s",
                 sys.argv[1],
             )
-            if bool(os.environ["DEBUG"])
+            if eval(os.environ["DEBUG"])
             else log.error(
                 "[bold red]Invalid command - %s",
                 sys.argv[1],

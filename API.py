@@ -8,13 +8,21 @@ import time
 import webbrowser
 
 import requests
+import yarl
 from dotenv import find_dotenv, load_dotenv
 from rich.logging import RichHandler
+from yarl import URL
 
 load_dotenv(find_dotenv())
 log = logging.getLogger()
 
-if bool(os.environ["DEBUG"]):
+
+ACCOUNT_URL = URL.build(
+    scheme="https",
+    host="accounts.spotify.com",
+)
+
+if eval(os.environ["DEBUG"]):
     logging.basicConfig(
         level="NOTSET",
         format="%(message)s",
@@ -31,7 +39,7 @@ else:
 
 
 class API:
-    """API class for seding all requests"""
+    """API class for sending all requests"""
 
     def __init__(self):
         try:
@@ -42,9 +50,9 @@ class API:
                 self.TOKEN = file.read()
         except KeyError:
             log.critical("[bold red]Enviorment-Variables are not set!")
-            DEBUG: bool = (
+            ERROR: eval = (
                 log.exception("[bold blue]Try running the authorise command")
-                if bool(os.environ["DEBUG"])
+                if eval(os.environ["DEBUG"])
                 else log.info("[bold blue]Try running the authorise command")
             )
 
@@ -57,7 +65,9 @@ class API:
 
         if response.status_code in (401, 400):
             self.refresh_key()
-            with open(os.path.join(os.environ["project_path"], "key.txt"), encoding="utf-8") as file:
+            with open(
+                os.path.join(os.environ["project_path"], "key.txt"), encoding="utf-8"
+            ) as file:
                 self.TOKEN = file.read()
             headers = {"Authorization": f"Bearer {self.TOKEN}"}
             response = requests.request(
@@ -66,7 +76,7 @@ class API:
 
         if not response.ok:
             log.warning(
-                "[bold red]request error | status-code: %d", response.status_code
+                "[bold red]request error - status-code: %d", response.status_code
             )
             log.info(response.json())
             sys.exit()
@@ -80,35 +90,31 @@ class API:
 
     def refresh_key(self):
         """Refresh API key"""
-        URL = "https://accounts.spotify.com/api/token"
-
+        url = URL(ACCOUNT_URL / "api/token")
         response = requests.post(
-            URL,
+            url,
             data={"grant_type": "refresh_token", "refresh_token": self.refresh_token},
             headers={"Authorization": "Basic " + self.base_64},
             timeout=10,
         )
-
         if not response.ok:
             log.warning(
-                "[bold red]request error | status-code: %d",
+                "[bold red]request error - status-code: %d",
                 response.status_code,
             )
             log.info(
                 "[bold blue]Most likely something wrong with base_64 or refresh_token, try running [bold green]spotr authorise[/bold green]"
             )
             sys.exit()
-
         data = response.json()
-
         with open(os.path.join(self.path, "key.txt"), "w", encoding="utf-8") as f:
             f.write(data["access_token"])
             f.close()
 
     def authorise(self):
         """Authtication process, Get BASE_64 and REFRESH_KEY"""
-        auth_url = "https://accounts.spotify.com/authorize"
-        token_url = "https://accounts.spotify.com/api/token"
+        auth_url = URL(ACCOUNT_URL / "authorize")
+        token_url = URL(ACCOUNT_URL / "api/token")
 
         client_id = str(input("Client id: "))
         client_secret = str(input("Client secret: "))
@@ -182,7 +188,9 @@ class API:
             if check_path.lower() != "y":
                 sys.exit()
 
-            if not os.path.exists(os.path.join(path, ".env")) or os.path.exists(os.path.join(path, "key.txt")):
+            if not os.path.exists(os.path.join(path, ".env")) or os.path.exists(
+                os.path.join(path, "key.txt")
+            ):
                 open(os.path.join(path, "key.txt"), "w", encoding="utf-8").close()
                 open(os.path.join(path, ".env"), "w", encoding="utf-8").close()
 
