@@ -81,6 +81,7 @@ Shuffle     - Toggle shuffle on or off <br>
 Playlist    - Start playing one of your playlists <br>
 Playlistadd - Add currently playing song to one of your playlists <br>
 Playback    - Set playback state <br>
+Suprise     - Play recommended song based on recently played tracks<br>
 
 <h3>Requires second argument</h3>
 Search      - Search for a song on spotify <br>
