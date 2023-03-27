@@ -1,151 +1,244 @@
+""" Router Class """
+
+import time
+import webbrowser
+
+import questionary
+import yarl
+from dotenv import find_dotenv, load_dotenv
+from rich.console import Console
+from yarl import URL
+
 from API import API
 from Helpers import Helpers
-from dotenv import load_dotenv, find_dotenv
-from rich.console import Console
-import questionary
-import webbrowser, os, time
 
 console = Console()
 load_dotenv(find_dotenv())
 
+""" URL - Variables """
+SPOTIFY_LIMIT = 50
+QUSTIONARY_LIMIT = 36
+API_BASE = yarl.URL("api.spotify.com")
+API_VERSION = yarl.URL("/v1")
+
+""" BASE - URLs """
+API_PLAYER = URL.build(
+    scheme="https", 
+    host=str(API_BASE), 
+    path=str(URL(API_VERSION / "me/player"))
+)
+API_BASE_VERSION = URL.build(
+    scheme="https", 
+    host=str(API_BASE), 
+    path=str(URL(API_VERSION))
+)
+
 
 class Router(API, Helpers):
+    """Available Spotr commands"""
 
     def refresh(self):
+        """Refresh API key"""
         self.refresh_key()
-        return
 
     def next(self):
-        self.request('POST', "https://api.spotify.com/v1/me/player/next")
+        """Play next track"""
+        self.request("POST", str(URL(API_PLAYER / "next")))
         self.current()
-        return
 
     def previous(self):
-        self.request('POST', "https://api.spotify.com/v1/me/player/previous")
-        return
+        """Play previous track"""
+        self.request("POST", str(URL(API_PLAYER / "previous")))
 
     def stop(self):
-        self.request('PUT', "https://api.spotify.com/v1/me/player/pause")
-        return
+        """Stop/Pause playing"""
+        self.request("PUT", str(URL(API_PLAYER / "pause")))
 
     def start(self):
-        self.request('PUT', "https://api.spotify.com/v1/me/player/play")
-        return
+        """Start/Resume playing"""
+        self.request("PUT", str(URL(API_PLAYER / "play")))
 
     def replay(self):
-        self.request('PUT', "https://api.spotify.com/v1/me/player/seek?position_ms=0")
-        return
-    
+        """Replay/Restart currently playing song"""
+        self.request(
+            "PUT", str(URL(API_PLAYER / "seek").with_query({"position_ms": 0}))
+        )
+
     def play(self, json=None):
-        self.request('PUT', "https://api.spotify.com/v1/me/player/play", json=json)
-        return
+        """Play song or collection of songs"""
+        self.request("PUT", str(URL(API_PLAYER / "play")), json=json)
 
     def web(self):
-        data = self.request('GET', "https://api.spotify.com/v1/me/player/currently-playing")
-        if data == None: return
-        webbrowser.open_new_tab(data['item']['external_urls']['spotify'])
-        return
+        """Open currently playing song in a broswer"""
+        data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
+        if data is None:
+            return
+        webbrowser.open_new_tab(data["item"]["external_urls"]["spotify"])
 
     def shuffle(self):
-        state = questionary.select("Choose playback state", choices=['true', 'false'], erase_when_done=True, use_shortcuts=True).ask()
-        self.request('PUT', f"https://api.spotify.com/v1/me/player/shuffle?state={state}")
-        return
+        """Toggle shuffle, on / off"""
+        state = questionary.select(
+            "Choose playback state",
+            choices=["true", "false"],
+            erase_when_done=True,
+            use_shortcuts=True,
+        ).ask()
+        self.request(
+            "PUT", str(URL(API_PLAYER / "shuffle").with_query({"state": state}))
+        )
 
     def volume(self):
-        volume = questionary.select("Choose volume precentage", choices=['25%', '50%', '75%', '100%'], erase_when_done=True, use_shortcuts=True).ask()
-        self.request('PUT', f"https://api.spotify.com/v1/me/player/volume?volume_percent={volume.replace('%', '')}")
-        return
+        """Ajust volume"""
+        volume = questionary.select(
+            "Choose volume precentage",
+            choices=["25%", "50%", "75%", "100%"],
+            erase_when_done=True,
+            use_shortcuts=True,
+        ).ask()
+        self.request(
+            "PUT",
+            str(
+                URL(API_PLAYER / "volume").with_query(
+                    {"volume_percent": volume.replace("%", "")}
+                )
+            ),
+        )
 
     def playback(self):
-        state = questionary.select("Choose a play state", choices=['track', 'context', 'off'], erase_when_done=True, use_shortcuts=True).ask()
-        if state is None: return
-        self.request('PUT', f"https://api.spotify.com/v1/me/player/repeat?state={state}")
+        """Set playback state"""
+        state = questionary.select(
+            "Choose a play state",
+            choices=["track", "context", "off"],
+            erase_when_done=True,
+            use_shortcuts=True,
+        ).ask()
+        if state is None:
+            return
+        self.request(
+            "PUT", str(URL(API_PLAYER / "repeat").with_query({"state": state}))
+        )
         return
 
     def queue(self):
-        data = self.request('GET', "https://api.spotify.com/v1/me/player/queue")
-        for track in data['queue']: console.print(f"[bold green]{track['name']}")
-        return
+        """Get Queue"""
+        data = self.request("GET", str(URL(API_PLAYER / "queue")))
+        for track in data["queue"]:
+            console.print(f"[bold green]{track['name']}")
 
     def recent(self):
-        data = self.request('GET', "https://api.spotify.com/v1/me/player/recently-played?limit=36")
-        choices = self.parseTracks(data['items'])
-        
+        """Get recently played tracks"""
+        data = self.request(
+            "GET",
+            str(
+                URL(API_PLAYER / "recently-played").with_query(
+                    {"limit": QUSTIONARY_LIMIT}
+                )
+            ),
+        )
+        choices = self.parse_tracks(data["items"], key="track")
+
         answer = questionary.select(
             "What song do you want to play?",
             choices=choices,
             erase_when_done=True,
             use_shortcuts=True,
             use_arrow_keys=True,
-            use_jk_keys=False
+            use_jk_keys=False,
         ).ask()
-        if answer is None: return
-        
-        answer = answer.split(' -- ')[0].strip()
-        for track in data['items']:
-            if track['track']['name'] == answer:
-                JSON = {
-                    "uris": [track['track']['uri']]
-                }
-                self.play(json=JSON)
+        if answer is None:
+            return
+
+        answer = answer.split(" -- ")[0].strip()
+        for track in data["items"]:
+            if track["track"]["name"] == answer:
+                json = {"uris": [track["track"]["uri"]]}
+                self.play(json=json)
                 time.sleep(0.5)
                 self.current()
                 return
 
-        return
-
     def playlist(self):
-        data = self.request('GET', "https://api.spotify.com/v1/me/playlists?limit=50")
-        choices= self.parseAlbums(data['items'])
+        """Choose a playlist"""
+        data = self.request(
+            "GET",
+            str(
+                URL(API_BASE_VERSION / "me/playlists").with_query(
+                    {"limit": SPOTIFY_LIMIT}
+                )
+            ),
+        )
+        choices = self.parse_albums(data["items"])
 
         answer = questionary.select(
             "What playlist do you want to play?",
             choices=choices,
             erase_when_done=True,
             use_arrow_keys=True,
-            use_jk_keys=False
+            use_jk_keys=False,
         ).ask()
-        if answer is None: return
+        if answer is None:
+            return
 
-        for playlist in data['items']:
-            if playlist['name'] == answer:
-                JSON = {
-                    "context_uri": playlist['uri'], 
-                    "offset": {
-                        "position": "0"
-                    }
-                }
-                self.play(json=JSON)
+        for playlist in data["items"]:
+            if playlist["name"] == answer:
+                json = {"context_uri": playlist["uri"], "offset": {"position": "0"}}
+                self.play(json=json)
                 time.sleep(0.5)
                 self.current()
                 return
-        return
-    
+
     def playlistadd(self):
-        playlists = self.request('GET', "https://api.spotify.com/v1/me/playlists?limit=50")
-        current_song = self.request('GET', "https://api.spotify.com/v1/me/player/currently-playing")
-        choices= self.parseAlbums(playlists['items'])
+        """Add currently plating track to playlist"""
+
+        playlists = self.request(
+            "GET",
+            str(
+                URL(API_BASE_VERSION / "me/playlists").with_query(
+                    {"limit": SPOTIFY_LIMIT}
+                )
+            ),
+        )
+        current_song = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
+        choices = self.parse_albums(playlists["items"])
 
         answer = questionary.select(
             "what playlist do you want to add track to?",
             choices=choices,
             erase_when_done=True,
             use_arrow_keys=True,
-            use_jk_keys=False
+            use_jk_keys=False,
         ).ask()
-        if answer is None: return
-        
-        for playlist in playlists['items']:
-            if playlist['name'] == answer:
-                self.request("POST", f"https://api.spotify.com/v1/playlists/{playlist['id']}/tracks?uris={current_song['item']['uri']}")
-                console.print(f"{current_song['item']['name']} was added to [bold green]{playlist['name']}")
+        if answer is None:
+            return
+
+        for playlist in playlists["items"]:
+            if playlist["name"] == answer:
+                self.request(
+                    "POST",
+                    str(
+                        URL(
+                            API_BASE_VERSION / "playlists" / playlist["id"] / "tracks"
+                        ).with_query({"uris": current_song["item"]["uri"]})
+                    ),
+                )
+                console.print(
+                    f"{current_song['item']['name']} was added to [bold green]{playlist['name']}"
+                )
                 return
-        return
 
     def search(self, *query):
-        if query == (): raise TypeError
-        data = self.request('GET', f"https://api.spotify.com/v1/search?q={' '.join(query)}&type=track&limit=36")
-        choices = self.parseTracks(data['tracks']['items'], None)
+        """Search for tracks on spotify"""
+        if not query:
+            raise TypeError
+        data = self.request(
+            "GET",
+            str(
+                URL(API_BASE_VERSION / "search").with_query(
+                    {"q": " ".join(query), "type": "track", "limit": QUSTIONARY_LIMIT}
+                )
+            ),
+        )
+        choices = self.parse_tracks(data["tracks"]["items"])
 
         answer = questionary.select(
             "What song do you want to play?",
@@ -153,26 +246,33 @@ class Router(API, Helpers):
             erase_when_done=True,
             use_shortcuts=True,
             use_arrow_keys=True,
-            use_jk_keys=False
+            use_jk_keys=False,
         ).ask()
-        if answer is None: return
-        
-        answer = answer.split(' -- ')[0].strip()
-        for track in data['tracks']['items']:
-            if track['name'] == answer:
-                JSON = {
-                    "uris": [track['uri']]
-                }
-                self.play(json=JSON)
+        if answer is None:
+            return
+
+        answer = answer.split(" -- ")[0].strip()
+        for track in data["tracks"]["items"]:
+            if track["name"] == answer:
+                json = {"uris": [track["uri"]]}
+                self.play(json=json)
                 time.sleep(0.5)
                 self.current()
-                return        
-        return
-    
+                return
+
     def album(self, *query):
-        if query == (): raise TypeError
-        data = self.request('GET', f"https://api.spotify.com/v1/search?q={' '.join(query)}&type=album&limit=36")
-        choices = self.parseTracks(data['albums']['items'], None)
+        """Search for albums on spotify"""
+        if not query:
+            raise TypeError
+        data = self.request(
+            "GET",
+            str(
+                URL(API_BASE_VERSION / "search").with_query(
+                    {"q": " ".join(query), "type": "album", "limit": QUSTIONARY_LIMIT}
+                )
+            ),
+        )
+        choices = self.parse_tracks(data["albums"]["items"])
 
         answer = questionary.select(
             "What album do you want to play?",
@@ -180,79 +280,81 @@ class Router(API, Helpers):
             erase_when_done=True,
             use_shortcuts=True,
             use_arrow_keys=True,
-            use_jk_keys=False
+            use_jk_keys=False,
         ).ask()
-        if answer is None: return
-        
-        answer = answer.split(' -- ')[0].strip()
-        for album in data['albums']['items']:
-            if album['name'] == answer:
-                JSON = {
-                    "context_uri": album['uri'], 
-                    "offset": {
-                        "position": "0"
-                    }
-                }
-                self.play(json=JSON)
+        if answer is None:
+            return
+
+        answer = answer.split(" -- ")[0].strip()
+        for album in data["albums"]["items"]:
+            if album["name"] == answer:
+                json = {"context_uri": album["uri"], "offset": {"position": "0"}}
+                self.play(json=json)
                 time.sleep(0.5)
                 self.current()
-                return        
-        return
+                return
 
     def suprise(self):
-        recent = self.request('GET', "https://api.spotify.com/v1/me/player/recently-played?limit=5")
+        """Play random / recommended track based on recent tracks"""
+        recent = self.request(
+            "GET", str(URL(API_PLAYER / "recently-played").with_query({"limit": 5}))
+        )
 
         seed_arists = []
-        seed_generes = ['all']
+        seed_generes = ["all"]
         seed_tracks = []
 
-        for track in recent['items']:
-            seed_tracks.append(track['track']['id'])
-            seed_arists.append(track['track']['artists'][0]['id'])
+        for track in recent["items"]:
+            seed_tracks.append(track["track"]["id"])
+            seed_arists.append(track["track"]["artists"][0]["id"])
 
-        query = f"seed_arists={','.join(seed_arists)}"
-        query += f"&seed_generes={','.join(seed_generes)}"
-        query += f"&seed_tracks={','.join(seed_tracks)}"
+        recommended = self.request(
+            "GET",
+            str(
+                URL(API_BASE_VERSION / "recommendations").with_query(
+                    {
+                        "seed_arists": ",".join(seed_arists),
+                        "seed_generes": ",".join(seed_generes),
+                        "seed_tracks": ",".join(seed_tracks),
+                        "limit": 5,
+                    }
+                )
+            ),
+        )
+        results = []
+        for track in recommended["tracks"]:
+            results.append(track["uri"])
+        json = {"uris": results, "offset": {"position": "0"}}
 
-        recommended = self.request('GET', f"https://api.spotify.com/v1/recommendations?{query}&limit=5")
-        results=[]
-        for track in recommended['tracks']:
-            results.append(track['uri'])
-        JSON = {
-            "uris": results, 
-            "offset": {
-                "position": "0"
-            }
-        }
-
-        self.play(json=JSON)
+        self.play(json=json)
         time.sleep(0.5)
         self.current()
-        return
 
     def current(self):
-        data = self.request('GET', "https://api.spotify.com/v1/me/player/currently-playing")
+        """Display information about current track"""
+        data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
 
-        if data == None:
+        if data is None:
             console.log("[bold red]No data")
             return
-        if data['item'] == None:
+        if data["item"] is None:
             self.current()
             return
 
-        track_id = data['item']['id']
-        track_name = data['item']['name']
-        track_type = data['item']['album']['album_type']
-        album_name = data['item']['album']['name']
-        track_release_date = data['item']['album']['release_date']
-        artist_names = ', '.join([artist['name'] for artist in data['item']['artists']])
-        track_duration_m = int(data['item']['duration_ms'] / 1000 / 60)
-        track_duration_s = int(data['item']['duration_ms'] / 1000 % 60)
-        track_url = data['item']['external_urls']['spotify']
-        progress_m = int(data['progress_ms'] / 1000 / 60)
-        progress_s = int(data['progress_ms'] / 1000 % 60)
+        track_id = data["item"]["id"]
+        track_name = data["item"]["name"]
+        track_type = data["item"]["album"]["album_type"]
+        album_name = data["item"]["album"]["name"]
+        track_release_date = data["item"]["album"]["release_date"]
+        artist_names = ", ".join([artist["name"] for artist in data["item"]["artists"]])
+        track_duration_m = int(data["item"]["duration_ms"] / 1000 / 60)
+        track_duration_s = int(data["item"]["duration_ms"] / 1000 % 60)
+        track_url = data["item"]["external_urls"]["spotify"]
+        progress_m = int(data["progress_ms"] / 1000 / 60)
+        progress_s = int(data["progress_ms"] / 1000 % 60)
 
-        console.print(f"""[green]
+        console.print(
+            f"""[green]
 
         ⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣶⣶⣶⣶⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀  [bold red]Current track[/bold red]
         ⠀⠀⠀⠀⢀⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⡀⠀⠀⠀⠀  ------------------------------
@@ -268,6 +370,6 @@ class Router(API, Helpers):
         ⠀⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠁⠀⠀⠀⠀  [bold white]Id[/bold white]  - {track_id}
         ⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠛⠿⠿⠿⠿⠛⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀  [bold white]URL[/bold white] - {track_url}
         
-        """, justify="left")
-
-        return
+        """,
+            justify="left",
+        )
