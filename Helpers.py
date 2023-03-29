@@ -13,22 +13,22 @@ class Helpers:
         choices = []
         longest_track = ""
         for track in data:
-            if len(track["name"] if not key else track["track"]["name"]) > len(
+            if len(track["name"] if not key else track[key]["name"]) > len(
                 longest_track
             ):
-                longest_track = track["name"] if not key else track["track"]["name"]
+                longest_track = track["name"] if not key else track[key]["name"]
         for track in data:
             artist_names = ", ".join(
                 [
                     artist["name"]
                     for artist in (
-                        track["artists"] if not key else track["track"]["artists"]
+                        track["artists"] if not key else track[key]["artists"]
                     )
                 ]
             )
             choices.append(
                 "{0:<{track_width}} -- {1}".format(
-                    (track["name"] if not key else track["track"]["name"]),
+                    (track["name"] if not key else track[key]["name"]),
                     artist_names,
                     track_width=len(longest_track),
                 )

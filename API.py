@@ -16,13 +16,9 @@ from yarl import URL
 load_dotenv(find_dotenv())
 log = logging.getLogger()
 
-""" Base - URL """
-ACCOUNT_URL = URL.build(
-    scheme="https",
-    host="accounts.spotify.com"
-)
 
-""" Logging """
+ACCOUNT_URL = URL.build(scheme="https", host="accounts.spotify.com")
+
 if eval(os.environ["DEBUG"]):
     logging.basicConfig(
         level="NOTSET",
@@ -91,7 +87,7 @@ class API:
 
     def refresh_key(self):
         """Refresh API key"""
-        url = URL(ACCOUNT_URL / "api/token")
+        url = ACCOUNT_URL / "api" / "token"
         response = requests.post(
             url,
             data={"grant_type": "refresh_token", "refresh_token": self.refresh_token},
@@ -113,9 +109,9 @@ class API:
             f.close()
 
     def authorise(self):
-        """Authtication process, Get BASE_64 and REFRESH_KEY"""
-        auth_url = URL(ACCOUNT_URL / "authorize")
-        token_url = URL(ACCOUNT_URL / "api/token")
+        """Authenticate with Spotify API"""
+        auth_url = ACCOUNT_URL / "authorize"
+        token_url = ACCOUNT_URL / "api" / "token"
 
         client_id = str(input("Client id: "))
         client_secret = str(input("Client secret: "))
@@ -181,9 +177,7 @@ class API:
 
             check_path = str(
                 input(
-                    "Data will be written to the following PATH, is it correct? ("
-                    + path
-                    + ") y/n: "
+                    f"Data will be written to the following PATH, is it correct? ({path}) y/n: "
                 )
             )
             if check_path.lower() != "y":
