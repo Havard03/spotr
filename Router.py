@@ -238,7 +238,8 @@ class Router(API, Helpers):
                 )
             ),
         )
-        choices = self.parse_tracks(data["tracks"]["items"])
+
+        choices = [f"{item['name']} -- {item['artists'][0]['name']}" for item in data["tracks"]["items"]]
 
         answer = questionary.select(
             "What song do you want to play?",
@@ -251,14 +252,18 @@ class Router(API, Helpers):
         if answer is None:
             return
 
-        answer = answer.split(" -- ")[0].strip()
+        selected_track = None
         for track in data["tracks"]["items"]:
-            if track["name"] == answer:
-                json = {"uris": [track["uri"]]}
-                self.play(json=json)
-                time.sleep(0.5)
-                self.current()
-                return
+            track_info = f"{track['name']} -- {track['artists'][0]['name']}"
+            if track_info == answer:
+                selected_track = track
+                break
+
+        if selected_track:
+            json = {"uris": [selected_track["uri"]]}
+            self.play(json=json)
+            time.sleep(0.5)
+            self.current()
 
     def album(self, *query):
         """Search for albums on spotify"""
