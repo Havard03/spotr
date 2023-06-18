@@ -16,7 +16,6 @@ console = Console()
 load_dotenv(find_dotenv())
 log = logging.getLogger()
 
-""" Logging """
 logging.basicConfig(
     level="NOTSET",
     format="%(message)s",
@@ -43,6 +42,7 @@ if len(sys.argv) < 2:
     ⠀⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠁⠀⠀⠀⠀  [bold white]Replay[/bold white]      - Replay / Restart currently playing track
     ⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠛⠿⠿⠿⠿⠛⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀  [bold white]Recent[/bold white]      - Get a list of your recently played tracks
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Volume[/bold white]      - Set volume in precentage
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Seek[/bold white]        - Seek track posistion in seconds
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Shuffle[/bold white]     - Toggle shuffle on or off
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playback[/bold white]    - Set playback state
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playlist[/bold white]    - Start playing one of your playlists
