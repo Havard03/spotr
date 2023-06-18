@@ -15,23 +15,12 @@ from Helpers import Helpers
 console = Console()
 load_dotenv(find_dotenv())
 
-""" URL - Variables """
 SPOTIFY_LIMIT = 50
 QUSTIONARY_LIMIT = 36
 API_BASE = yarl.URL("api.spotify.com")
-API_VERSION = yarl.URL("/v1")
-
-""" BASE - URLs """
-API_PLAYER = URL.build(
-    scheme="https", 
-    host=str(API_BASE), 
-    path=str(URL(API_VERSION / "me/player"))
-)
-API_BASE_VERSION = URL.build(
-    scheme="https", 
-    host=str(API_BASE), 
-    path=str(URL(API_VERSION))
-)
+API_VERSION = yarl.URL("v1")
+API_PLAYER = yarl.URL("https://api.spotify.com") / str(API_VERSION) / "me" / "player"
+API_BASE_VERSION = yarl.URL("https://api.spotify.com") / str(API_VERSION)
 
 
 class Router(API, Helpers):
@@ -49,6 +38,7 @@ class Router(API, Helpers):
     def previous(self):
         """Play previous track"""
         self.request("POST", str(URL(API_PLAYER / "previous")))
+        self.current()
 
     def stop(self):
         """Stop/Pause playing"""
@@ -60,8 +50,17 @@ class Router(API, Helpers):
 
     def replay(self):
         """Replay/Restart currently playing song"""
+        self.request("PUT", str(URL(API_PLAYER / "seek").with_query(position_ms=0)))
+
+    def seek(self, progress):
+        """Seek posistion for track in seconds"""
         self.request(
-            "PUT", str(URL(API_PLAYER / "seek").with_query({"position_ms": 0}))
+            "PUT",
+            str(
+                URL(API_PLAYER / "seek").with_query(
+                    position_ms=int(progress) * 1000
+                )
+            ),
         )
 
     def play(self, json=None):
@@ -83,23 +82,26 @@ class Router(API, Helpers):
             erase_when_done=True,
             use_shortcuts=True,
         ).ask()
-        self.request(
-            "PUT", str(URL(API_PLAYER / "shuffle").with_query({"state": state}))
-        )
+        self.request("PUT", str(URL(API_PLAYER / "shuffle").with_query(state=state)))
 
-    def volume(self):
+    def volume(self, volume=None):
         """Ajust volume"""
-        volume = questionary.select(
-            "Choose volume precentage",
-            choices=["25%", "50%", "75%", "100%"],
-            erase_when_done=True,
-            use_shortcuts=True,
-        ).ask()
+        if volume is None:
+            volume = questionary.select(
+                "Choose volume precentage",
+                choices=["25%", "50%", "75%", "100%"],
+                erase_when_done=True,
+                use_shortcuts=True,
+            ).ask()
+        if int(volume) < 0:
+            volume = 0
+        elif int(volume) > 100:
+            volume = 100
         self.request(
             "PUT",
             str(
                 URL(API_PLAYER / "volume").with_query(
-                    {"volume_percent": volume.replace("%", "")}
+                    volume_percent=str(volume).replace("%", "")
                 )
             ),
         )
@@ -114,9 +116,7 @@ class Router(API, Helpers):
         ).ask()
         if state is None:
             return
-        self.request(
-            "PUT", str(URL(API_PLAYER / "repeat").with_query({"state": state}))
-        )
+        self.request("PUT", str(URL(API_PLAYER / "repeat").with_query(state=state)))
         return
 
     def queue(self):
@@ -129,11 +129,7 @@ class Router(API, Helpers):
         """Get recently played tracks"""
         data = self.request(
             "GET",
-            str(
-                URL(API_PLAYER / "recently-played").with_query(
-                    {"limit": QUSTIONARY_LIMIT}
-                )
-            ),
+            str(URL(API_PLAYER / "recently-played").with_query(limit=QUSTIONARY_LIMIT)),
         )
         choices = self.parse_tracks(data["items"], key="track")
 
@@ -162,8 +158,8 @@ class Router(API, Helpers):
         data = self.request(
             "GET",
             str(
-                URL(API_BASE_VERSION / "me/playlists").with_query(
-                    {"limit": SPOTIFY_LIMIT}
+                URL(API_BASE_VERSION / "me" / "playlists").with_query(
+                    limit=SPOTIFY_LIMIT
                 )
             ),
         )
@@ -192,11 +188,7 @@ class Router(API, Helpers):
 
         playlists = self.request(
             "GET",
-            str(
-                URL(API_BASE_VERSION / "me/playlists").with_query(
-                    {"limit": SPOTIFY_LIMIT}
-                )
-            ),
+            str(URL(API_BASE_VERSION / "me/playlists").with_query(limit=SPOTIFY_LIMIT)),
         )
         current_song = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
         choices = self.parse_albums(playlists["items"])
@@ -218,7 +210,7 @@ class Router(API, Helpers):
                     str(
                         URL(
                             API_BASE_VERSION / "playlists" / playlist["id"] / "tracks"
-                        ).with_query({"uris": current_song["item"]["uri"]})
+                        ).with_query(uris=current_song["item"]["uri"])
                     ),
                 )
                 console.print(
@@ -234,7 +226,7 @@ class Router(API, Helpers):
             "GET",
             str(
                 URL(API_BASE_VERSION / "search").with_query(
-                    {"q": " ".join(query), "type": "track", "limit": QUSTIONARY_LIMIT}
+                    q=" ".join(query), type="track", limit=QUSTIONARY_LIMIT
                 )
             ),
         )
@@ -268,7 +260,7 @@ class Router(API, Helpers):
             "GET",
             str(
                 URL(API_BASE_VERSION / "search").with_query(
-                    {"q": " ".join(query), "type": "album", "limit": QUSTIONARY_LIMIT}
+                    q=" ".join(query), type="album", limit=QUSTIONARY_LIMIT
                 )
             ),
         )
@@ -297,7 +289,7 @@ class Router(API, Helpers):
     def suprise(self):
         """Play random / recommended track based on recent tracks"""
         recent = self.request(
-            "GET", str(URL(API_PLAYER / "recently-played").with_query({"limit": 5}))
+            "GET", str(URL(API_PLAYER / "recently-played").with_query(limit=5))
         )
 
         seed_arists = []
@@ -373,3 +365,7 @@ class Router(API, Helpers):
         """,
             justify="left",
         )
+        
+    """Shorthands"""    
+    prev = previous
+    vol = volume
