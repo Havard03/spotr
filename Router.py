@@ -40,8 +40,6 @@ class Router(API, Helpers):
         self.request("POST", str(URL(API_PLAYER / "previous")))
         self.current()
 
-    prev = previous
-
     def stop(self):
         """Stop/Pause playing"""
         self.request("PUT", str(URL(API_PLAYER / "pause")))
@@ -107,8 +105,6 @@ class Router(API, Helpers):
                 )
             ),
         )
-
-    vol = volume
 
     def playback(self):
         """Set playback state"""
@@ -369,3 +365,7 @@ class Router(API, Helpers):
         """,
             justify="left",
         )
+        
+    """Shorthands"""    
+    prev = previous
+    vol = volume
