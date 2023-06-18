@@ -78,6 +78,7 @@ Replay      - Replay / Restart currently playing song <br>
 Recent      - Get a list of your recently played songs <br>
 Volume      - Set volume in precentage <br>
 Shuffle     - Toggle shuffle on or off <br>
+Seek        - Seek track posistion in seconds <br>
 Playlist    - Start playing one of your playlists <br>
 Playlistadd - Add currently playing song to one of your playlists <br>
 Playback    - Set playback state <br>
