@@ -93,10 +93,11 @@ class Router(API, Helpers):
                 erase_when_done=True,
                 use_shortcuts=True,
             ).ask()
-        if int(volume) < 0:
-            volume = 0
-        elif int(volume) > 100:
-            volume = 100
+        else:
+            if int(volume) < 0:
+                volume = 0
+            elif int(volume) > 100:
+                volume = 100
         self.request(
             "PUT",
             str(
@@ -144,9 +145,10 @@ class Router(API, Helpers):
         if answer is None:
             return
 
-        answer = answer.split(" -- ")[0].strip()
+        answer = answer.replace(' ', '')
         for track in data["items"]:
-            if track["track"]["name"] == answer:
+            track_name = f"{track['track']['name']}--{','.join(artist['name'] for artist in track['track']['artists'])}".replace(' ', '')
+            if track_name == answer:
                 json = {"uris": [track["track"]["uri"]]}
                 self.play(json=json)
                 time.sleep(0.5)
@@ -231,7 +233,7 @@ class Router(API, Helpers):
             ),
         )
 
-        choices = [f"{item['name']} -- {item['artists'][0]['name']}" for item in data["tracks"]["items"]]
+        choices = self.parse_tracks(data["tracks"]["items"])
 
         answer = questionary.select(
             "What song do you want to play?",
@@ -244,18 +246,15 @@ class Router(API, Helpers):
         if answer is None:
             return
 
-        selected_track = None
+        answer = answer.replace(' ', '')
         for track in data["tracks"]["items"]:
-            track_info = f"{track['name']} -- {track['artists'][0]['name']}"
-            if track_info == answer:
-                selected_track = track
-                break
-
-        if selected_track:
-            json = {"uris": [selected_track["uri"]]}
-            self.play(json=json)
-            time.sleep(0.5)
-            self.current()
+            track_name = f"{track['name']}--{','.join(artist['name'] for artist in track['artists'])}".replace(' ', '')
+            if track_name == answer:
+                json = {"uris": [track["uri"]]}
+                self.play(json=json)
+                time.sleep(0.5)
+                self.current()
+                return
 
     def album(self, *query):
         """Search for albums on spotify"""
@@ -282,9 +281,10 @@ class Router(API, Helpers):
         if answer is None:
             return
 
-        answer = answer.split(" -- ")[0].strip()
+        answer = answer.replace(' ', '')
         for album in data["albums"]["items"]:
-            if album["name"] == answer:
+            album_name = f"{album['name']}--{','.join(artist['name'] for artist in album['artists'])}".replace(' ', '')
+            if album_name == answer:
                 json = {"context_uri": album["uri"], "offset": {"position": "0"}}
                 self.play(json=json)
                 time.sleep(0.5)
