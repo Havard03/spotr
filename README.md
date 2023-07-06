@@ -32,7 +32,7 @@ It is now possible to bring the pictures into the terminal with image to ascii c
 <br>
 Use "ascii" command to show image
 <br>
-Or set ASCII variable in config.json to replace spotify logo wiht ascii image for "current" command
+Or set ASCII variable to True in config.json to replace spotify logo with ascii image for "current" command
 </p>
 
 
