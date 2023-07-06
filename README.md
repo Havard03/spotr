@@ -24,7 +24,8 @@ Made in python for simplicity
 
 <h1 align="center" style="border-bottom: none">NEWS</h1>
 
-<img align="center" width="100%" src="">
+<img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/de42f9f6-5e12-485c-8c3a-59e39e829b30">
+
 
 <p align="center">
 It is now possible to bring the pictures into the terminal with image to ascii convertion!
