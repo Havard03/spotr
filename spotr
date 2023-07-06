@@ -4,8 +4,8 @@
 import logging
 import os
 import sys
+import json
 
-from dotenv import find_dotenv, load_dotenv
 from rich.console import Console
 from rich.logging import RichHandler
 
@@ -13,15 +13,30 @@ from Router import Router
 
 route = Router()
 console = Console()
-load_dotenv(find_dotenv())
 log = logging.getLogger()
 
-logging.basicConfig(
-    level="NOTSET",
-    format="%(message)s",
-    datefmt="[%X]",
-    handlers=[RichHandler(markup=True, rich_tracebacks=True)],
-)
+with open(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json"),
+    "r",
+    encoding="utf-8",
+) as f:
+    CONFIG = json.load(f)
+    DEBUG = CONFIG["DEBUG"]
+
+if eval(DEBUG):
+    logging.basicConfig(
+        level="NOTSET",
+        format="%(message)s",
+        datefmt="[%X]",
+        handlers=[RichHandler(markup=True, rich_tracebacks=True)],
+    )
+else:
+    logging.basicConfig(
+        level="INFO",
+        datefmt="[%X]",
+        format="%(message)s",
+        handlers=[RichHandler(markup=True)],
+    )
 
 
 if len(sys.argv) < 2:
@@ -48,6 +63,7 @@ if len(sys.argv) < 2:
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playlist[/bold white]    - Start playing one of your playlists
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playlistadd[/bold white] - Add currently playing song to one of your playlists
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Suprise[/bold white]     - Play recommended song based on recently played tracks
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Ascii[/bold white]     - Display ascii image for current track, increase size width using second argument (default 100)
 
     """
     )
@@ -102,7 +118,7 @@ elif len(sys.argv) >= 2:
                         "[bold red]Invalid command - %s",
                         sys.argv[1],
                     )
-                    if eval(os.environ["DEBUG"])
+                    if eval(DEBUG)
                     else log.error(
                         "[bold red]Invalid command - %s",
                         sys.argv[1],
@@ -114,7 +130,7 @@ elif len(sys.argv) >= 2:
                         "[bold red]Command needs input argument(s) - %s",
                         sys.argv[1],
                     )
-                    if eval(os.environ["DEBUG"])
+                    if eval(DEBUG)
                     else log.error(
                         "[bold red]Command needs input argument(s) - %s",
                         sys.argv[1],
@@ -129,7 +145,7 @@ elif len(sys.argv) >= 2:
                         "[bold red]Invalid argument - %s",
                         sys.argv[1],
                     )
-                    if eval(os.environ["DEBUG"])
+                    if eval(DEBUG)
                     else log.error("[bold red]Invalid argument")
                 )
             except TypeError:
@@ -138,7 +154,7 @@ elif len(sys.argv) >= 2:
                         "[bold red]Command doesnt take second argument - %s",
                         sys.argv[1],
                     )
-                    if eval(os.environ["DEBUG"])
+                    if eval(DEBUG)
                     else log.error(
                         "[bold red]Command doesnt take second argument - %s",
                         sys.argv[1],
@@ -150,7 +166,7 @@ elif len(sys.argv) >= 2:
                 "[bold red]Command in ignore list - %s",
                 sys.argv[1],
             )
-            if eval(os.environ["DEBUG"])
+            if eval(DEBUG)
             else log.error(
                 "[bold red]Command in ignore list - %s",
                 sys.argv[1],

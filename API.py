@@ -6,33 +6,14 @@ import os
 import sys
 import time
 import webbrowser
+import json
 
 import requests
-import yarl
-from dotenv import find_dotenv, load_dotenv
-from rich.logging import RichHandler
 from yarl import URL
 
-load_dotenv(find_dotenv())
 log = logging.getLogger()
 
-
 ACCOUNT_URL = URL.build(scheme="https", host="accounts.spotify.com")
-
-if eval(os.environ["DEBUG"]):
-    logging.basicConfig(
-        level="NOTSET",
-        format="%(message)s",
-        datefmt="[%X]",
-        handlers=[RichHandler(markup=True, rich_tracebacks=True)],
-    )
-else:
-    logging.basicConfig(
-        level="INFO",
-        datefmt="[%X]",
-        format="%(message)s",
-        handlers=[RichHandler(markup=True)],
-    )
 
 
 class API:
@@ -40,33 +21,52 @@ class API:
 
     def __init__(self):
         try:
-            self.path = os.environ["project_path"]
-            self.refresh_token = os.environ["refresh_token"]
-            self.base_64 = os.environ["base_64"]
-            with open(os.path.join(self.path, "key.txt"), encoding="utf-8") as file:
-                self.TOKEN = file.read()
-        except KeyError:
-            log.critical("[bold red]Enviorment-Variables are not set!")
-            ERROR: eval = (
-                log.exception("[bold blue]Try running the authorise command")
-                if eval(os.environ["DEBUG"])
-                else log.info("[bold blue]Try running the authorise command")
-            )
+            with open(
+                os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)), "config.json"
+                ),
+                "r",
+                encoding="utf-8",
+            ) as file:
+                self.CONFIG = json.load(file)
+        except FileNotFoundError:
+            log.critical("Config file not found!")
+            create_file = str(input("Do you wish to create the config file? y/n: "))
+            if create_file.lower() == "y":
+                self.CONFIG = {
+                    "path": os.path.dirname(os.path.realpath(__file__)),
+                    "refresh_token": "",
+                    "base_64": "",
+                    "key": "",
+                    "DEBUG": "False",
+                    "ASCII": "True",
+                }
+                with open(
+                    os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)), "config.json"
+                    ),
+                    "w",
+                    encoding="utf-8",
+                ) as file:
+                    json.dump(self.CONFIG, file, indent=4)
+
+    def write(self):
+        """Write json data"""
+        with open(
+            os.path.join(self.CONFIG["path"], "config.json"), "w", encoding="utf-8"
+        ) as file:
+            json.dump(self.CONFIG, file, indent=4)
 
     def request(self, method, url, headers=None, json=None):
         """Spotr request, with deafult headers"""
         if headers is None:
-            headers = {"Authorization": f"Bearer {self.TOKEN}"}
+            headers = {"Authorization": f"Bearer {self.CONFIG['key']}"}
 
         response = requests.request(method, url, headers=headers, json=json, timeout=10)
 
         if response.status_code in (401, 400):
             self.refresh_key()
-            with open(
-                os.path.join(os.environ["project_path"], "key.txt"), encoding="utf-8"
-            ) as file:
-                self.TOKEN = file.read()
-            headers = {"Authorization": f"Bearer {self.TOKEN}"}
+            headers = {"Authorization": f"Bearer {self.CONFIG['key']}"}
             response = requests.request(
                 method, url, headers=headers, json=json, timeout=10
             )
@@ -90,8 +90,11 @@ class API:
         url = ACCOUNT_URL / "api" / "token"
         response = requests.post(
             url,
-            data={"grant_type": "refresh_token", "refresh_token": self.refresh_token},
-            headers={"Authorization": "Basic " + self.base_64},
+            data={
+                "grant_type": "refresh_token",
+                "refresh_token": self.CONFIG["refresh_token"],
+            },
+            headers={"Authorization": "Basic " + self.CONFIG["base_64"]},
             timeout=10,
         )
         if not response.ok:
@@ -100,21 +103,20 @@ class API:
                 response.status_code,
             )
             log.info(
-                "[bold blue]Most likely something wrong with base_64 or refresh_token, try running [bold green]spotr authorise[/bold green]"
+                "[bold blue]Most likely something wrong with base_64 or refresh_token, try running 'spotr authorise'"
             )
             sys.exit()
         data = response.json()
-        with open(os.path.join(self.path, "key.txt"), "w", encoding="utf-8") as f:
-            f.write(data["access_token"])
-            f.close()
+        self.CONFIG["key"] = data["access_token"]
+        self.write()
 
     def authorise(self):
         """Authenticate with Spotify API"""
         auth_url = ACCOUNT_URL / "authorize"
         token_url = ACCOUNT_URL / "api" / "token"
 
-        client_id = str(input("Client id: "))
-        client_secret = str(input("Client secret: "))
+        client_id = str(input("Spotify-App Client id: "))
+        client_secret = str(input("Spotify-App Client secret: "))
 
         auth_request = requests.get(
             auth_url,
@@ -158,46 +160,6 @@ class API:
 
         access_token_response_data = access_token_request.json()
 
-        try:
-            env_data = f"""
-            #Environmental-variables
-            project_path="{self.path}"
-            refresh_token="{access_token_response_data['refresh_token']}"
-            base_64="{client_creds_b64.decode()}"
-            DEBUG="False"
-            """.replace(
-                " ", ""
-            )
-
-            with open(os.path.join(self.path, ".env"), "w", encoding="utf-8") as f:
-                f.write(env_data)
-
-        except AttributeError:
-            path = os.path.dirname(__file__)
-
-            check_path = str(
-                input(
-                    f"Data will be written to the following PATH, is it correct? ({path}) y/n: "
-                )
-            )
-            if check_path.lower() != "y":
-                sys.exit()
-
-            if not os.path.exists(os.path.join(path, ".env")) or os.path.exists(
-                os.path.join(path, "key.txt")
-            ):
-                open(os.path.join(path, "key.txt"), "w", encoding="utf-8").close()
-                open(os.path.join(path, ".env"), "w", encoding="utf-8").close()
-
-            env_data = f"""
-            #Environmental-variables
-            project_path="{path}/"
-            refresh_token="{access_token_response_data["refresh_token"]}"
-            base_64="{client_creds_b64.decode()}"
-            DEBUG="False"
-            """.replace(
-                " ", ""
-            )
-
-            with open(os.path.join(path, ".env"), "w", encoding="utf-8") as f:
-                f.write(env_data)
+        self.CONFIG["refresh_token"] = access_token_response_data["refresh_token"]
+        self.CONFIG["base_64"] = client_creds_b64.decode()
+        self.write()
