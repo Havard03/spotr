@@ -5,15 +5,14 @@ import webbrowser
 
 import questionary
 import yarl
-from dotenv import find_dotenv, load_dotenv
 from rich.console import Console
 from yarl import URL
 
+from ascii import *
 from API import API
 from Helpers import Helpers
 
 console = Console()
-load_dotenv(find_dotenv())
 
 SPOTIFY_LIMIT = 50
 QUSTIONARY_LIMIT = 36
@@ -56,11 +55,7 @@ class Router(API, Helpers):
         """Seek posistion for track in seconds"""
         self.request(
             "PUT",
-            str(
-                URL(API_PLAYER / "seek").with_query(
-                    position_ms=int(progress) * 1000
-                )
-            ),
+            str(URL(API_PLAYER / "seek").with_query(position_ms=int(progress) * 1000)),
         )
 
     def play(self, json=None):
@@ -145,9 +140,11 @@ class Router(API, Helpers):
         if answer is None:
             return
 
-        answer = answer.replace(' ', '')
+        answer = answer.replace(" ", "")
         for track in data["items"]:
-            track_name = f"{track['track']['name']}--{','.join(artist['name'] for artist in track['track']['artists'])}".replace(' ', '')
+            track_name = f"{track['track']['name']}--{','.join(artist['name'] for artist in track['track']['artists'])}".replace(
+                " ", ""
+            )
             if track_name == answer:
                 json = {"uris": [track["track"]["uri"]]}
                 self.play(json=json)
@@ -246,9 +243,11 @@ class Router(API, Helpers):
         if answer is None:
             return
 
-        answer = answer.replace(' ', '')
+        answer = answer.replace(" ", "")
         for track in data["tracks"]["items"]:
-            track_name = f"{track['name']}--{','.join(artist['name'] for artist in track['artists'])}".replace(' ', '')
+            track_name = f"{track['name']}--{','.join(artist['name'] for artist in track['artists'])}".replace(
+                " ", ""
+            )
             if track_name == answer:
                 json = {"uris": [track["uri"]]}
                 self.play(json=json)
@@ -281,9 +280,11 @@ class Router(API, Helpers):
         if answer is None:
             return
 
-        answer = answer.replace(' ', '')
+        answer = answer.replace(" ", "")
         for album in data["albums"]["items"]:
-            album_name = f"{album['name']}--{','.join(artist['name'] for artist in album['artists'])}".replace(' ', '')
+            album_name = f"{album['name']}--{','.join(artist['name'] for artist in album['artists'])}".replace(
+                " ", ""
+            )
             if album_name == answer:
                 json = {"context_uri": album["uri"], "offset": {"position": "0"}}
                 self.play(json=json)
@@ -327,6 +328,15 @@ class Router(API, Helpers):
         time.sleep(0.5)
         self.current()
 
+    def ascii(self, width=100):
+        """Ascii image for current track"""
+        data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
+        ascii_str = main(data["item"]["album"]["images"][0]["url"], int(width))
+
+        for i in range(0, len(ascii_str), int(width)):
+            row = ascii_str[i : i + int(width)]
+            print(row)
+
     def current(self):
         """Display information about current track"""
         data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
@@ -347,30 +357,65 @@ class Router(API, Helpers):
         track_duration_m = int(data["item"]["duration_ms"] / 1000 / 60)
         track_duration_s = int(data["item"]["duration_ms"] / 1000 % 60)
         track_url = data["item"]["external_urls"]["spotify"]
+        track_image = data["item"]["album"]["images"][0]["url"]
         progress_m = int(data["progress_ms"] / 1000 / 60)
         progress_s = int(data["progress_ms"] / 1000 % 60)
 
-        console.print(
-            f"""[green]
+        if eval(self.CONFIG["ASCII"]):
+            width = 75
+            ascii_str = main(data["item"]["album"]["images"][0]["url"], width)
+            strings = [
+                "[bold red]Current track[/bold red]",
+                "[green]------------------------------[/green]",
+                f" [bold white]Name[/bold white][green]          -  {track_name}[/green]",
+                f" [bold white]Artits[/bold white][green]        -  {artist_names}[/green]",
+                f" [bold white]Duration[/bold white][green]      -  {track_duration_m} minutes {track_duration_s} seconds[/green]",
+                f" [bold white]Progress[/bold white][green]      -  {progress_m} minutes {progress_s} seconds[/green]",
+                f" [bold white]Release date[/bold white][green]  -  {track_release_date}[/green]",
+                f" [bold white]From[/bold white][green]          -  {track_type} - {album_name}[/green]",
+                "[bold red]Track details[/bold red]",
+                "[green]------------------------------[/green]",
+                f" [bold white]Id[/bold white][green]  - {track_id}[/green]",
+                f" [bold white]URL[/bold white][green] - {track_url}[/green]",
+                f" [bold white]Image[/bold white][green] - {track_image}[/green]",
+            ]
 
-        ⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣶⣶⣶⣶⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀  [bold red]Current track[/bold red]
-        ⠀⠀⠀⠀⢀⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⡀⠀⠀⠀⠀  ------------------------------
-        ⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⠀⠀⠀  [bold white]Name[/bold white]          -  {track_name}
-        ⠀⢀⣾⣿⡿⠿⠛⠛⠛⠉⠉⠉⠉⠛⠛⠛⠿⠿⣿⣿⣿⣿⣿⣷⡀⠀  [bold white]Artits[/bold white]        -  {artist_names}
-        ⠀⣾⣿⣿⣇⠀⣀⣀⣠⣤⣤⣤⣤⣤⣀⣀⠀⠀⠀⠈⠙⠻⣿⣿⣷⠀  [bold white]Duration[/bold white]      -  {track_duration_m} minutes {track_duration_s} seconds
-        ⢠⣿⣿⣿⣿⡿⠿⠟⠛⠛⠛⠛⠛⠛⠻⠿⢿⣿⣶⣤⣀⣠⣿⣿⣿⡄  [bold white]Progress[/bold white]      -  {progress_m} minutes {progress_s} seconds
-        ⢸⣿⣿⣿⣿⣇⣀⣀⣤⣤⣤⣤⣤⣄⣀⣀⠀⠀⠉⠛⢿⣿⣿⣿⣿⡇  [bold white]Release date[/bold white]  -  {track_release_date} 
-        ⠘⣿⣿⣿⣿⣿⠿⠿⠛⠛⠛⠛⠛⠛⠿⠿⣿⣶⣦⣤⣾⣿⣿⣿⣿⠃  [bold white]From[/bold white]          -  {track_type} - {album_name}
-        ⠀⢿⣿⣿⣿⣿⣤⣤⣤⣤⣶⣶⣦⣤⣤⣄⡀⠈⠙⣿⣿⣿⣿⣿⡿⠀  
-        ⠀⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣾⣿⣿⣿⣿⡿⠁⠀  [bold red]Track details[/bold red]
-        ⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀  ------------------------------
-        ⠀⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠁⠀⠀⠀⠀  [bold white]Id[/bold white]  - {track_id}
-        ⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠛⠿⠿⠿⠿⠛⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀  [bold white]URL[/bold white] - {track_url}
+            y = 0
+            for i in range(0, len(ascii_str), int(width)):
+                row = ascii_str[i : i + int(width)]
+                if i >= 675 and y < len(strings):
+                    console.print(f"     [white]{row}[/white]    {strings[y]}")
+                    y = y + 1
+                elif i == 0:
+                    print("")
+                    print(f"     {row}")
+                elif i == 2400:
+                    print(f"     {row}")
+                    print("")
+                else:
+                    print(f"     {row}")
+        else:
+            console.print(
+                f"""[green]
+
+    ⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣶⣶⣶⣶⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀  [bold red]Current track[/bold red]
+    ⠀⠀⠀⠀⢀⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⡀⠀⠀⠀⠀  ------------------------------
+    ⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⠀⠀⠀  [bold white]Name[/bold white]          -  {track_name}
+    ⠀⢀⣾⣿⡿⠿⠛⠛⠛⠉⠉⠉⠉⠛⠛⠛⠿⠿⣿⣿⣿⣿⣿⣷⡀⠀  [bold white]Artits[/bold white]        -  {artist_names}
+    ⠀⣾⣿⣿⣇⠀⣀⣀⣠⣤⣤⣤⣤⣤⣀⣀⠀⠀⠀⠈⠙⠻⣿⣿⣷⠀  [bold white]Duration[/bold white]      -  {track_duration_m} minutes {track_duration_s} seconds
+    ⢠⣿⣿⣿⣿⡿⠿⠟⠛⠛⠛⠛⠛⠛⠻⠿⢿⣿⣶⣤⣀⣠⣿⣿⣿⡄  [bold white]Progress[/bold white]      -  {progress_m} minutes {progress_s} seconds
+    ⢸⣿⣿⣿⣿⣇⣀⣀⣤⣤⣤⣤⣤⣄⣀⣀⠀⠀⠉⠛⢿⣿⣿⣿⣿⡇  [bold white]Release date[/bold white]  -  {track_release_date} 
+    ⠘⣿⣿⣿⣿⣿⠿⠿⠛⠛⠛⠛⠛⠛⠿⠿⣿⣶⣦⣤⣾⣿⣿⣿⣿⠃  [bold white]From[/bold white]          -  {track_type} - {album_name}
+    ⠀⢿⣿⣿⣿⣿⣤⣤⣤⣤⣶⣶⣦⣤⣤⣄⡀⠈⠙⣿⣿⣿⣿⣿⡿⠀  
+    ⠀⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣾⣿⣿⣿⣿⡿⠁⠀  [bold red]Track details[/bold red]
+    ⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀  ------------------------------
+    ⠀⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠁⠀⠀⠀⠀  [bold white]Id[/bold white]  - {track_id}
+    ⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠛⠿⠿⠿⠿⠛⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀  [bold white]URL[/bold white] - {track_url}
         
         """,
-            justify="left",
-        )
-        
-    """Shorthands"""    
+                justify="left",
+            )
+
+    """Shorthands"""
     prev = previous
     vol = volume

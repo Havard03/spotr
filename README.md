@@ -22,6 +22,19 @@ Made in python for simplicity
 
 <img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/228016062-60718528-212a-49c9-ac3d-c81bb43d3278.gif">
 
+<h1 align="center" style="border-bottom: none">NEWS</h1>
+
+<img align="center" width="100%" src="">
+
+<p align="center">
+It is now possible to bring the pictures into the terminal with image to ascii convertion!
+<br>
+Use "ascii" command to show image
+<br>
+Or set ASCII variable in config.json to replace spotify logo wiht ascii image for "current" command
+</p>
+
+
 <h1 align="center" style="border-bottom: none">Installation</h1>
 
 <h3>Script</h3>
@@ -29,11 +42,11 @@ Made in python for simplicity
 
 1. Got to <a href="https://developer.spotify.com/dashboard/">Spotify dashboard</a> and register an app
 
-2. In options, set callback URI to "https://www.google.com/"
+2. In options, set Redirect URIs to "https://www.google.com/"
 
 3. Clone repo, cd into folder, and run install script (python3 install.py)
 
-4. Follow instructions in script
+4. Follow instructions in script (paste in client-id and client-secret from spotify application when prompted)
 
 5. Run spotr in terminal and enjoy
 
@@ -50,11 +63,11 @@ Made in python for simplicity
 
 4. Install project requirements: pip3 install -r requirements.txt
 
-5. Run "spotr authorise" command in terminal and enter keys from the registered spotify app
+5. Run "./spotr authorise" command in terminal and enter keys from the registered spotify app (You will be propted to create "config.json file")
 
-6. Follow the steps and check that all relevant data was written to .env file
+6. Follow the steps and check that all relevant data was written to config.json file
 
-7. Add current folder to PATH so the spotr file is excecutable everywhere
+7. Add current folder to PATH so the spotr file is excecutable everywhere (PATH=$PATH:/path/to/file)
 
 9. Run spotr in terminal and enjoy
 
@@ -83,6 +96,7 @@ Playlist    - Start playing one of your playlists <br>
 Playlistadd - Add currently playing song to one of your playlists <br>
 Playback    - Set playback state <br>
 Suprise     - Play recommended song based on recently played tracks<br>
+Ascii       - Display ascii image for current track, increase size width using second argument (default 100)
 
 <h3>Requires second argument</h3>
 Search      - Search for a song on spotify <br>
