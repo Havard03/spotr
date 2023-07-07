@@ -23,10 +23,6 @@ Made in python for simplicity
 <img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/228016062-60718528-212a-49c9-ac3d-c81bb43d3278.gif">
 
 <h1 align="center" style="border-bottom: none">NEWS</h1>
-
-<img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/de42f9f6-5e12-485c-8c3a-59e39e829b30">
-
-<br>
 <p align="center">
 It is now possible to bring the pictures into the terminal with image to ascii convertion!
 <br>
@@ -34,6 +30,8 @@ Use "ascii" command to show image
 <br>
 Or set ASCII variable to True in config.json to replace spotify logo with ascii image for "current" command
 </p>
+
+<img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/de42f9f6-5e12-485c-8c3a-59e39e829b30">
 
 
 <h1 align="center" style="border-bottom: none">Installation</h1>
