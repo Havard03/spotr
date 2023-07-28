@@ -31,7 +31,7 @@ Use "ascii" command to show image
 Or set ASCII variable to True in config.json to replace spotify logo with ascii image for "current" command
 </p>
 
-<img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/de42f9f6-5e12-485c-8c3a-59e39e829b30">
+<img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/a036d7af-bf94-42aa-bf39-a15f7c943a27">
 
 
 <h1 align="center" style="border-bottom: none">Installation</h1>
