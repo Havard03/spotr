@@ -40,6 +40,12 @@ class API:
                     "key": "",
                     "DEBUG": "False",
                     "ASCII": "True",
+                    "ASCII_SIZE_WIDTH": "50",
+                    "ASCII_COLOR": "True",
+                    "ASCII_UNICODE": "True",
+                    "ASCII_CHARS": "@%#*+=-:.`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
+                    "PRINT_DELAY_ACTIVE": "True",
+                    "PRINT_DELAY": "0.01"
                 }
                 with open(
                     os.path.join(
@@ -49,6 +55,8 @@ class API:
                     encoding="utf-8",
                 ) as file:
                     json.dump(self.CONFIG, file, indent=4)
+                print("Starting spotify authentication process...")
+                self.authorise()
 
     def write(self):
         """Write json data"""
@@ -129,7 +137,7 @@ class API:
             timeout=10,
         )
 
-        log.info(
+        print(
             "URL will open in 5 seconds, Accept the terms, Copy the code in the redirected URL, Then paste the code into the terminal"
         )
         time.sleep(5)
@@ -163,3 +171,4 @@ class API:
         self.CONFIG["refresh_token"] = access_token_response_data["refresh_token"]
         self.CONFIG["base_64"] = client_creds_b64.decode()
         self.write()
+        print("All done!")
