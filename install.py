@@ -40,6 +40,12 @@ CONFIG = {
     "key": "",
     "DEBUG": "False",
     "ASCII": "True",
+    "ASCII_SIZE_WIDTH": "50",
+    "ASCII_COLOR": "True",
+    "ASCII_UNICODE": "True",
+    "ASCII_CHARS": "@%#*+=-:.`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
+    "PRINT_DELAY_ACTIVE": "True",
+    "PRINT_DELAY": "0.01"
 }
 with open(os.path.join(PATH, "config.json"), "w", encoding="utf-8") as file:
     json.dump(CONFIG, file, indent=4)

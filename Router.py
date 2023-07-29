@@ -8,7 +8,7 @@ import yarl
 from rich.console import Console
 from yarl import URL
 
-from ascii import *
+from ASCII import ASCII
 from API import API
 from Helpers import Helpers
 
@@ -22,7 +22,7 @@ API_PLAYER = yarl.URL("https://api.spotify.com") / str(API_VERSION) / "me" / "pl
 API_BASE_VERSION = yarl.URL("https://api.spotify.com") / str(API_VERSION)
 
 
-class Router(API, Helpers):
+class Router(API, Helpers, ASCII):
     """Available Spotr commands"""
 
     def refresh(self):
@@ -331,11 +331,18 @@ class Router(API, Helpers):
     def ascii(self, width=100):
         """Ascii image for current track"""
         data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
-        ascii_str = main(data["item"]["album"]["images"][0]["url"], int(width))
-
-        for i in range(0, len(ascii_str), int(width)):
-            row = ascii_str[i : i + int(width)]
-            print(row)
+        ascii_str = (
+            self.image_to_ascii_color(
+                data["item"]["album"]["images"][0]["url"], int(width)
+            )
+            if eval(self.CONFIG["ASCII_COLOR"])
+            else self.image_to_ascii(
+                data["item"]["album"]["images"][0]["url"], int(width)
+            )
+        )
+        lines = ascii_str.splitlines()
+        for line in lines:
+            print(line)
 
     def current(self):
         """Display information about current track"""
@@ -362,38 +369,49 @@ class Router(API, Helpers):
         progress_s = int(data["progress_ms"] / 1000 % 60)
 
         if eval(self.CONFIG["ASCII"]):
-            width = 75
-            ascii_str = main(data["item"]["album"]["images"][0]["url"], width)
+            width = self.CONFIG["ASCII_SIZE_WIDTH"]
+            ascii_str = (
+                self.image_to_ascii_color(
+                    data["item"]["album"]["images"][0]["url"], int(width)
+                )
+                if eval(self.CONFIG["ASCII_COLOR"])
+                else self.image_to_ascii(
+                    data["item"]["album"]["images"][0]["url"], int(width)
+                )
+            )
             strings = [
-                "[bold red]Current track[/bold red]",
-                "[green]------------------------------[/green]",
-                f" [bold white]Name[/bold white][green]          -  {track_name}[/green]",
-                f" [bold white]Artits[/bold white][green]        -  {artist_names}[/green]",
-                f" [bold white]Duration[/bold white][green]      -  {track_duration_m} minutes {track_duration_s} seconds[/green]",
-                f" [bold white]Progress[/bold white][green]      -  {progress_m} minutes {progress_s} seconds[/green]",
-                f" [bold white]Release date[/bold white][green]  -  {track_release_date}[/green]",
-                f" [bold white]From[/bold white][green]          -  {track_type} - {album_name}[/green]",
-                "[bold red]Track details[/bold red]",
-                "[green]------------------------------[/green]",
-                f" [bold white]Id[/bold white][green]  - {track_id}[/green]",
-                f" [bold white]URL[/bold white][green] - {track_url}[/green]",
-                f" [bold white]Image[/bold white][green] - {track_image}[/green]",
+                "\x1b[31mCurrent track\x1b[0m",
+                "\x1b[32m------------------------------\x1b[0m",
+                f" \x1b[37mName\x1b[0m\x1b[32m          -  {track_name}\x1b[0m",
+                f" \x1b[37mArtits\x1b[0m\x1b[32m        -  {artist_names}\x1b[0m",
+                f" \x1b[37mDuration\x1b[0m\x1b[32m      -  {track_duration_m} minutes {track_duration_s} seconds\x1b[0m",
+                f" \x1b[37mProgress\x1b[0m\x1b[32m      -  {progress_m} minutes {progress_s} seconds\x1b[0m",
+                f" \x1b[37mRelease date\x1b[0m\x1b[32m  -  {track_release_date}\x1b[0m",
+                f" \x1b[37mFrom\x1b[0m\x1b[32m          -  {track_type} - {album_name}\x1b[0m",
+                "\x1b[31mTrack details\x1b[0m",
+                "\x1b[32m------------------------------\x1b[0m",
+                f" \x1b[37mId\x1b[0m\x1b[32m  - {track_id}\x1b[0m",
+                f" \x1b[37mURL\x1b[0m\x1b[32m - {track_url}\x1b[0m",
+                f" \x1b[37mImage\x1b[0m\x1b[32m - {track_image}\x1b[0m",
             ]
 
             y = 0
-            for i in range(0, len(ascii_str), int(width)):
-                row = ascii_str[i : i + int(width)]
-                if i >= 675 and y < len(strings):
-                    console.print(f"     [white]{row}[/white]    {strings[y]}")
-                    y = y + 1
-                elif i == 0:
+            lines = ascii_str.splitlines()
+            for i, line in enumerate(lines):
+                if eval(self.CONFIG['PRINT_DELAY_ACTIVE']):
+                    time.sleep(float(self.CONFIG['PRINT_DELAY']))
+                if i == 0:
                     print("")
-                    print(f"     {row}")
-                elif i == 2400:
-                    print(f"     {row}")
+                    print(f"     {line}")
+                elif i == len(lines)-1:
+                    print(f"     {line}")
                     print("")
+                elif i >= int(int(len(lines)) / 2 - 8) and y < len(strings):
+                    print(f"     {line}     {strings[y]}")
+                    y += 1
                 else:
-                    print(f"     {row}")
+                    print(f"     {line}")
+
         else:
             console.print(
                 f"""[green]
@@ -419,3 +437,4 @@ class Router(API, Helpers):
     """Shorthands"""
     prev = previous
     vol = volume
+    curren = current

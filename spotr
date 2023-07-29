@@ -73,6 +73,10 @@ elif len(sys.argv) >= 2:
     sys.argv[1] = sys.argv[1].lower()
 
     if sys.argv[1] not in [
+        "rgb_to_ansi",
+        "resize_image",
+        "image_to_ascii",
+        "image_to_ascii_color"
         "parse_tracks",
         "parse_albums",
         "play",
