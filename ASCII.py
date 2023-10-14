@@ -5,9 +5,7 @@ import logging
 from PIL import Image
 import requests
 
-
 log = logging.getLogger()
-
 
 class ASCII:
     """ASCII class"""
@@ -34,8 +32,10 @@ class ASCII:
         ascii_str = ""
         ascii_art = ""
         for pixel_value in pixels:
-            ascii_str += self.CONFIG["ASCII_CHARS"][
-                max(0, min(pixel_value // 16, len(self.CONFIG["ASCII_CHARS"]) - 1))
+            ascii_str += self.CONFIG["ASCII_IMAGE_CHARS"][
+                max(
+                    0, min(pixel_value // 16, len(self.CONFIG["ASCII_IMAGE_CHARS"]) - 1)
+                )
             ]
         for i in range(0, len(ascii_str), int(desired_width)):
             row = ascii_str[i : i + int(desired_width)]
@@ -63,14 +63,15 @@ class ASCII:
                     r, g, b, *_ = pixels[x, y]
                 except TypeError:
                     LOG = (
-                        log.exception("something went wrong with image convertion")
+                        log.exception("Something went wrong with image convertion")
                         if eval(self.CONFIG["DEBUG"])
-                        else log.error("something went wrong with image convertion")
+                        else log.error("Something went wrong with image convertion")
                     )
                     exit()
-                char = "\u2588" if eval(self.CONFIG["ASCII_UNICODE"]) else "@"
+                char = "\u2588" if eval(self.CONFIG["ASCII_IMAGE_UNICODE"]) else "@"
                 ascii_art += self.rgb_to_ansi(r, g, b) + char
-            ascii_art += "\n"
+            if y != resized_image.height - 1:  # Check if it's the last iteration
+                ascii_art += "\n"
 
         ascii_art += "\x1b[0m"
 

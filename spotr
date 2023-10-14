@@ -21,9 +21,8 @@ with open(
     encoding="utf-8",
 ) as f:
     CONFIG = json.load(f)
-    DEBUG = CONFIG["DEBUG"]
 
-if eval(DEBUG):
+if eval(CONFIG["DEBUG"]):
     logging.basicConfig(
         level="NOTSET",
         format="%(message)s",
@@ -38,141 +37,53 @@ else:
         handlers=[RichHandler(markup=True)],
     )
 
-
 if len(sys.argv) < 2:
-    console.print(
-        """[green]
-                  
-    ⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣶⣶⣶⣶⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀  [bold red]ARGUMENTS[/bold red] [ [bold yellow]*[/bold yellow] = Needs second argument ]
-    ⠀⠀⠀⠀⢀⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⡀⠀⠀⠀⠀  ---------------------------------------
-    ⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⠀⠀⠀  [bold white]Search[/bold white]      [bold yellow]*[/bold yellow] Search for a song on spotify
-    ⠀⢀⣾⣿⡿⠿⠛⠛⠛⠉⠉⠉⠉⠛⠛⠛⠿⠿⣿⣿⣿⣿⣿⣷⡀⠀  [bold white]Current[/bold white]     - Displays info for the current playing song
-    ⠀⣾⣿⣿⣇⠀⣀⣀⣠⣤⣤⣤⣤⣤⣀⣀⠀⠀⠀⠈⠙⠻⣿⣿⣷⠀  [bold white]Web[/bold white]         - Open currently playing track in a browser
-    ⢠⣿⣿⣿⣿⡿⠿⠟⠛⠛⠛⠛⠛⠛⠻⠿⢿⣿⣶⣤⣀⣠⣿⣿⣿⡄  [bold white]Queue[/bold white]       - Get a list over song in your current queue
-    ⢸⣿⣿⣿⣿⣇⣀⣀⣤⣤⣤⣤⣤⣄⣀⣀⠀⠀⠉⠛⢿⣿⣿⣿⣿⡇  [bold white]Album[/bold white]       [bold yellow]*[/bold yellow] Seach for albums on spotify
-    ⠘⣿⣿⣿⣿⣿⠿⠿⠛⠛⠛⠛⠛⠛⠿⠿⣿⣶⣦⣤⣾⣿⣿⣿⣿⠃  [bold white]Next[/bold white]        - Play next track
-    ⠀⢿⣿⣿⣿⣿⣤⣤⣤⣤⣶⣶⣦⣤⣤⣄⡀⠈⠙⣿⣿⣿⣿⣿⡿⠀  [bold white]Previous[/bold white]    - Play previous track
-    ⠀⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣾⣿⣿⣿⣿⡿⠁⠀  [bold white]Start[/bold white]       - Start playing
-    ⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀  [bold white]Stop[/bold white]        - Stop / Pause playing
-    ⠀⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠁⠀⠀⠀⠀  [bold white]Replay[/bold white]      - Replay / Restart currently playing track
-    ⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠛⠿⠿⠿⠿⠛⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀  [bold white]Recent[/bold white]      - Get a list of your recently played tracks
-    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Volume[/bold white]      - Set volume in precentage
-    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Seek[/bold white]        - Seek track posistion in seconds
-    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Shuffle[/bold white]     - Toggle shuffle on or off
-    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playback[/bold white]    - Set playback state
-    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playlist[/bold white]    - Start playing one of your playlists
-    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Playlistadd[/bold white] - Add currently playing song to one of your playlists
-    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Suprise[/bold white]     - Play recommended song based on recently played tracks
-    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  [bold white]Ascii[/bold white]     - Display ascii image for current track, increase size width using second argument (default 100)
-
-    """
-    )
+    getattr(route, "parse_functions")()
     sys.exit()
 
 elif len(sys.argv) >= 2:
     sys.argv[1] = sys.argv[1].lower()
-
-    if sys.argv[1] not in [
-        "rgb_to_ansi",
-        "resize_image",
-        "image_to_ascii",
-        "image_to_ascii_color"
-        "parse_tracks",
-        "parse_albums",
-        "play",
-        "path",
-        "base_64",
-        "request",
-        "TOKEN",
-        "__class__",
-        "__delattr__",
-        "__dict__",
-        "__dir__",
-        "__doc__",
-        "__eq__",
-        "__format__",
-        "__ge__",
-        "__getattribute__",
-        "__gt__",
-        "__hash__",
-        "__init__",
-        "__init_subclass__",
-        "__le__",
-        "__lt__",
-        "__module__",
-        "__ne__",
-        "__new__",
-        "__reduce__",
-        "__reduce_ex__",
-        "__repr__",
-        "__setattr__",
-        "__sizeof__",
-        "__str__",
-        "__subclasshook__",
-        "__weakref__",
-    ]:
+    if sys.argv[1] not in CONFIG["IGNORED_FUNCTIONS"]:
         try:
             sys.argv[2]
         except IndexError:
             try:
                 getattr(route, sys.argv[1])()
             except AttributeError:
+                message = f"[bold red]Invalid command - {sys.argv[1]}"
                 ERROR: log = (
-                    log.exception(
-                        "[bold red]Invalid command - %s",
-                        sys.argv[1],
-                    )
-                    if eval(DEBUG)
-                    else log.error(
-                        "[bold red]Invalid command - %s",
-                        sys.argv[1],
-                    )
+                    log.exception(message)
+                    if eval(CONFIG["DEBUG"])
+                    else log.error(message)
                 )
             except TypeError:
+                message = f"[bold red]Command needs input argument(s) - {sys.argv[1]}"
                 ERROR: log = (
-                    log.exception(
-                        "[bold red]Command needs input argument(s) - %s",
-                        sys.argv[1],
-                    )
-                    if eval(DEBUG)
-                    else log.error(
-                        "[bold red]Command needs input argument(s) - %s",
-                        sys.argv[1],
-                    )
+                    log.exception(message)
+                    if eval(CONFIG["DEBUG"])
+                    else log.error(message)
                 )
         else:
             try:
                 getattr(route, sys.argv[1])(*sys.argv[2:])
             except AttributeError:
+                message = f"[bold red]Invalid argument - {sys.argv[1]}"
                 ERROR: log = (
-                    log.exception(
-                        "[bold red]Invalid argument - %s",
-                        sys.argv[1],
-                    )
-                    if eval(DEBUG)
-                    else log.error("[bold red]Invalid argument")
+                    log.exception(message)
+                    if eval(CONFIG["DEBUG"])
+                    else log.error(message)
                 )
             except TypeError:
+                message = (
+                    f"[bold red]Command doesnt take second argument - {sys.argv[1]}"
+                )
                 ERROR: log = (
-                    log.exception(
-                        "[bold red]Command doesnt take second argument - %s",
-                        sys.argv[1],
-                    )
-                    if eval(DEBUG)
-                    else log.error(
-                        "[bold red]Command doesnt take second argument - %s",
-                        sys.argv[1],
-                    )
+                    log.exception(message)
+                    if eval(CONFIG["DEBUG"])
+                    else log.error(message)
                 )
     else:
+        message = f"[bold red]Command in ignore list - {sys.argv[1]}"
         ERROR: log = (
-            log.exception(
-                "[bold red]Command in ignore list - %s",
-                sys.argv[1],
-            )
-            if eval(DEBUG)
-            else log.error(
-                "[bold red]Command in ignore list - %s",
-                sys.argv[1],
-            )
+            log.exception(message) if eval(CONFIG["DEBUG"]) else log.error(message)
         )

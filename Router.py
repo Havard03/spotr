@@ -1,8 +1,10 @@
 """ Router Class """
 
+import re
 import time
 import webbrowser
-
+import logging
+import textwrap
 import questionary
 import yarl
 from rich.console import Console
@@ -11,7 +13,9 @@ from yarl import URL
 from ASCII import ASCII
 from API import API
 from Helpers import Helpers
+from Configuration import Configuration
 
+log = logging.getLogger()
 console = Console()
 
 SPOTIFY_LIMIT = 50
@@ -21,8 +25,7 @@ API_VERSION = yarl.URL("v1")
 API_PLAYER = yarl.URL("https://api.spotify.com") / str(API_VERSION) / "me" / "player"
 API_BASE_VERSION = yarl.URL("https://api.spotify.com") / str(API_VERSION)
 
-
-class Router(API, Helpers, ASCII):
+class Router(Configuration, API, Helpers, ASCII):
     """Available Spotr commands"""
 
     def refresh(self):
@@ -47,6 +50,10 @@ class Router(API, Helpers, ASCII):
         """Start/Resume playing"""
         self.request("PUT", str(URL(API_PLAYER / "play")))
 
+    def play(self, json=None):
+        """Play song or collection of songs"""
+        self.request("PUT", str(URL(API_PLAYER / "play")), json=json)
+
     def replay(self):
         """Replay/Restart currently playing song"""
         self.request("PUT", str(URL(API_PLAYER / "seek").with_query(position_ms=0)))
@@ -58,12 +65,8 @@ class Router(API, Helpers, ASCII):
             str(URL(API_PLAYER / "seek").with_query(position_ms=int(progress) * 1000)),
         )
 
-    def play(self, json=None):
-        """Play song or collection of songs"""
-        self.request("PUT", str(URL(API_PLAYER / "play")), json=json)
-
     def web(self):
-        """Open currently playing song in a broswer"""
+        """Open currently playing track in a broswer"""
         data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
         if data is None:
             return
@@ -127,9 +130,16 @@ class Router(API, Helpers, ASCII):
             "GET",
             str(URL(API_PLAYER / "recently-played").with_query(limit=QUSTIONARY_LIMIT)),
         )
-        choices = self.parse_tracks(data["items"], key="track")
 
-        answer = questionary.select(
+        choices = self.parse_items(
+            data,
+            accessor=["items"],
+            return_value=["track", "uri"],
+            name_value=["track", "name"],
+            artists_value=["track", "artists"],
+        )
+
+        selected = questionary.select(
             "What song do you want to play?",
             choices=choices,
             erase_when_done=True,
@@ -137,20 +147,13 @@ class Router(API, Helpers, ASCII):
             use_arrow_keys=True,
             use_jk_keys=False,
         ).ask()
-        if answer is None:
+
+        if selected is None:
             return
 
-        answer = answer.replace(" ", "")
-        for track in data["items"]:
-            track_name = f"{track['track']['name']}--{','.join(artist['name'] for artist in track['track']['artists'])}".replace(
-                " ", ""
-            )
-            if track_name == answer:
-                json = {"uris": [track["track"]["uri"]]}
-                self.play(json=json)
-                time.sleep(0.5)
-                self.current()
-                return
+        json_data = {"uris": [selected]}
+        self.play(json=json_data)
+        self.current()
 
     def playlist(self):
         """Choose a playlist"""
@@ -162,77 +165,144 @@ class Router(API, Helpers, ASCII):
                 )
             ),
         )
-        choices = self.parse_albums(data["items"])
 
-        answer = questionary.select(
+        choices = self.parse_items(
+            data,
+            accessor=["items"],
+            return_value=["uri"],
+            name_value=["name"],
+            artists_value=False,
+        )
+
+        selected = questionary.select(
             "What playlist do you want to play?",
             choices=choices,
             erase_when_done=True,
             use_arrow_keys=True,
             use_jk_keys=False,
         ).ask()
-        if answer is None:
+        if selected is None:
             return
 
-        for playlist in data["items"]:
-            if playlist["name"] == answer:
-                json = {"context_uri": playlist["uri"], "offset": {"position": "0"}}
-                self.play(json=json)
-                time.sleep(0.5)
-                self.current()
-                return
+        json = {"context_uri": selected, "offset": {"position": "0"}}
+        self.play(json=json)
+        self.current()
+        return
 
     def playlistadd(self):
-        """Add currently plating track to playlist"""
+        """Add currently playing track to playlist"""
 
-        playlists = self.request(
+        data = self.request(
             "GET",
             str(URL(API_BASE_VERSION / "me/playlists").with_query(limit=SPOTIFY_LIMIT)),
         )
-        current_song = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
-        choices = self.parse_albums(playlists["items"])
 
-        answer = questionary.select(
+        current_song = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
+
+        choices = self.parse_items(
+            data,
+            accessor=["items"],
+            return_value=["id"],
+            name_value=["name"],
+            artists_value=False,
+        )
+
+        selected = questionary.select(
             "what playlist do you want to add track to?",
             choices=choices,
             erase_when_done=True,
             use_arrow_keys=True,
             use_jk_keys=False,
         ).ask()
-        if answer is None:
+
+        if selected is None:
             return
 
-        for playlist in playlists["items"]:
-            if playlist["name"] == answer:
-                self.request(
-                    "POST",
-                    str(
-                        URL(
-                            API_BASE_VERSION / "playlists" / playlist["id"] / "tracks"
-                        ).with_query(uris=current_song["item"]["uri"])
-                    ),
+        self.request(
+            "POST",
+            str(
+                URL(API_BASE_VERSION / "playlists" / selected / "tracks").with_query(
+                    uris=current_song["item"]["uri"]
                 )
-                console.print(
-                    f"{current_song['item']['name']} was added to [bold green]{playlist['name']}"
-                )
-                return
+            ),
+        )
+        return
 
     def search(self, *query):
-        """Search for tracks on spotify"""
+        """Search for anything on spotify, Types - track, playlist, album"""
+
         if not query:
             raise TypeError
+
+        search_types = {
+            "track": {
+                "accessor": ["tracks", "items"],
+                "return_value": ["uri"],
+                "name_value": ["name"],
+                "artists_value": ["artists"],
+                "artists_array": True,
+                "json_value": "uris",
+                "json_value_array": True,
+                "json": {"uris": []},
+            },
+            "playlist": {
+                "accessor": ["playlists", "items"],
+                "return_value": ["uri"],
+                "name_value": ["name"],
+                "artists_value": ["owner", "display_name"],
+                "artists_array": False,
+                "json_value": "context_uri",
+                "json_value_array": False,
+                "json": {"context_uri": [], "offset": {"position": "0"}},
+            },
+            "album": {
+                "accessor": ["albums", "items"],
+                "return_value": ["uri"],
+                "name_value": ["name"],
+                "artists_value": ["artists"],
+                "artists_array": True,
+                "json_value": "context_uri",
+                "json_value_array": False,
+                "json": {"context_uri": [], "offset": {"position": "0"}},
+            },
+        }
+
+        if query[0] not in ["track", "playlist", "album"]:
+            available_types = ["track", "playlist", "album"]
+            search_type = questionary.select(
+                "Select search type",
+                choices=available_types,
+                erase_when_done=True,
+                use_shortcuts=True,
+                use_arrow_keys=True,
+                use_jk_keys=False,
+            ).ask()
+            if search_type is None:
+                return
+        else:
+            query = list(query)
+            search_type = query[0]
+            query.pop(0)
+
         data = self.request(
             "GET",
             str(
                 URL(API_BASE_VERSION / "search").with_query(
-                    q=" ".join(query), type="track", limit=QUSTIONARY_LIMIT
+                    q=" ".join(query), type=search_type, limit=QUSTIONARY_LIMIT
                 )
             ),
         )
 
-        choices = self.parse_tracks(data["tracks"]["items"])
+        choices = self.parse_items(
+            data,
+            accessor=search_types[search_type]["accessor"],
+            return_value=search_types[search_type]["return_value"],
+            name_value=search_types[search_type]["name_value"],
+            artists_value=search_types[search_type]["artists_value"],
+            artists_array=search_types[search_type]["artists_array"],
+        )
 
-        answer = questionary.select(
+        selected = questionary.select(
             "What song do you want to play?",
             choices=choices,
             erase_when_done=True,
@@ -240,59 +310,21 @@ class Router(API, Helpers, ASCII):
             use_arrow_keys=True,
             use_jk_keys=False,
         ).ask()
-        if answer is None:
+
+        if selected is None:
             return
 
-        answer = answer.replace(" ", "")
-        for track in data["tracks"]["items"]:
-            track_name = f"{track['name']}--{','.join(artist['name'] for artist in track['artists'])}".replace(
-                " ", ""
-            )
-            if track_name == answer:
-                json = {"uris": [track["uri"]]}
-                self.play(json=json)
-                time.sleep(0.5)
-                self.current()
-                return
+        json = search_types[search_type]["json"]
+        if search_types[search_type]["json_value_array"]:
+            json[search_types[search_type]["json_value"]] = [selected]
+        else:
+            json[search_types[search_type]["json_value"]] = selected
 
-    def album(self, *query):
-        """Search for albums on spotify"""
-        if not query:
-            raise TypeError
-        data = self.request(
-            "GET",
-            str(
-                URL(API_BASE_VERSION / "search").with_query(
-                    q=" ".join(query), type="album", limit=QUSTIONARY_LIMIT
-                )
-            ),
-        )
-        choices = self.parse_tracks(data["albums"]["items"])
+        self.play(json=json)
+        self.current()
+        return
 
-        answer = questionary.select(
-            "What album do you want to play?",
-            choices=choices,
-            erase_when_done=True,
-            use_shortcuts=True,
-            use_arrow_keys=True,
-            use_jk_keys=False,
-        ).ask()
-        if answer is None:
-            return
-
-        answer = answer.replace(" ", "")
-        for album in data["albums"]["items"]:
-            album_name = f"{album['name']}--{','.join(artist['name'] for artist in album['artists'])}".replace(
-                " ", ""
-            )
-            if album_name == answer:
-                json = {"context_uri": album["uri"], "offset": {"position": "0"}}
-                self.play(json=json)
-                time.sleep(0.5)
-                self.current()
-                return
-
-    def suprise(self):
+    def recommend(self):
         """Play random / recommended track based on recent tracks"""
         recent = self.request(
             "GET", str(URL(API_PLAYER / "recently-played").with_query(limit=5))
@@ -325,7 +357,6 @@ class Router(API, Helpers, ASCII):
         json = {"uris": results, "offset": {"position": "0"}}
 
         self.play(json=json)
-        time.sleep(0.5)
         self.current()
 
     def ascii(self, width=100):
@@ -335,7 +366,7 @@ class Router(API, Helpers, ASCII):
             self.image_to_ascii_color(
                 data["item"]["album"]["images"][0]["url"], int(width)
             )
-            if eval(self.CONFIG["ASCII_COLOR"])
+            if eval(self.CONFIG["ASCII_IMAGE_COLOR"])
             else self.image_to_ascii(
                 data["item"]["album"]["images"][0]["url"], int(width)
             )
@@ -345,96 +376,85 @@ class Router(API, Helpers, ASCII):
             print(line)
 
     def current(self):
-        """Display information about current track"""
+        """Display information about the current track"""
         data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
 
-        if data is None:
+        if data is None or data["item"] is None:
             console.log("[bold red]No data")
             return
-        if data["item"] is None:
-            self.current()
-            return
 
-        track_id = data["item"]["id"]
-        track_name = data["item"]["name"]
-        track_type = data["item"]["album"]["album_type"]
-        album_name = data["item"]["album"]["name"]
-        track_release_date = data["item"]["album"]["release_date"]
-        artist_names = ", ".join([artist["name"] for artist in data["item"]["artists"]])
-        track_duration_m = int(data["item"]["duration_ms"] / 1000 / 60)
-        track_duration_s = int(data["item"]["duration_ms"] / 1000 % 60)
-        track_url = data["item"]["external_urls"]["spotify"]
-        track_image = data["item"]["album"]["images"][0]["url"]
-        progress_m = int(data["progress_ms"] / 1000 / 60)
-        progress_s = int(data["progress_ms"] / 1000 % 60)
+        current_track = data["item"]
+        album_data = current_track["album"]
+        artist_names = ", ".join(
+            [artist["name"] for artist in current_track["artists"]]
+        )
 
-        if eval(self.CONFIG["ASCII"]):
-            width = self.CONFIG["ASCII_SIZE_WIDTH"]
-            ascii_str = (
-                self.image_to_ascii_color(
-                    data["item"]["album"]["images"][0]["url"], int(width)
-                )
-                if eval(self.CONFIG["ASCII_COLOR"])
-                else self.image_to_ascii(
-                    data["item"]["album"]["images"][0]["url"], int(width)
-                )
-            )
-            strings = [
-                "\x1b[31mCurrent track\x1b[0m",
-                "\x1b[32m------------------------------\x1b[0m",
-                f" \x1b[37mName\x1b[0m\x1b[32m          -  {track_name}\x1b[0m",
-                f" \x1b[37mArtits\x1b[0m\x1b[32m        -  {artist_names}\x1b[0m",
-                f" \x1b[37mDuration\x1b[0m\x1b[32m      -  {track_duration_m} minutes {track_duration_s} seconds\x1b[0m",
-                f" \x1b[37mProgress\x1b[0m\x1b[32m      -  {progress_m} minutes {progress_s} seconds\x1b[0m",
-                f" \x1b[37mRelease date\x1b[0m\x1b[32m  -  {track_release_date}\x1b[0m",
-                f" \x1b[37mFrom\x1b[0m\x1b[32m          -  {track_type} - {album_name}\x1b[0m",
-                "\x1b[31mTrack details\x1b[0m",
-                "\x1b[32m------------------------------\x1b[0m",
-                f" \x1b[37mId\x1b[0m\x1b[32m  - {track_id}\x1b[0m",
-                f" \x1b[37mURL\x1b[0m\x1b[32m - {track_url}\x1b[0m",
-                f" \x1b[37mImage\x1b[0m\x1b[32m - {track_image}\x1b[0m",
-            ]
+        track_duration_ms = current_track["duration_ms"]
+        track_duration_m, track_duration_s = divmod(track_duration_ms // 1000, 60)
 
-            y = 0
-            lines = ascii_str.splitlines()
-            for i, line in enumerate(lines):
-                if eval(self.CONFIG['PRINT_DELAY_ACTIVE']):
-                    time.sleep(float(self.CONFIG['PRINT_DELAY']))
-                if i == 0:
-                    print("")
-                    print(f"     {line}")
-                elif i == len(lines)-1:
-                    print(f"     {line}")
-                    print("")
-                elif i >= int(int(len(lines)) / 2 - 8) and y < len(strings):
-                    print(f"     {line}     {strings[y]}")
-                    y += 1
-                else:
-                    print(f"     {line}")
+        progress_ms = data["progress_ms"]
+        progress_m, progress_s = divmod(progress_ms // 1000, 60)
 
+        track_id = current_track["id"]
+        track_name = current_track["name"]
+        track_type = album_data["album_type"]
+        album_name = album_data["name"]
+        track_release_date = album_data["release_date"]
+        track_url = current_track["external_urls"]["spotify"]
+        track_image = album_data["images"][0]["url"]
+
+        color_start = "\x1b[{}m".format
+        color_end = "\x1b[0m"
+
+        strings = textwrap.dedent(
+            f"""
+        {color_start('31')}Current track{color_end}
+        {color_start('32')}------------------------------{color_end}
+        {color_start('37')}Name{color_end}{color_start('32')}          -  {track_name}{color_end}
+        {color_start('37')}Artits{color_end}{color_start('32')}        -  {artist_names}{color_end}
+        {color_start('37')}Duration{color_end}{color_start('32')}      -  {track_duration_m} minutes {track_duration_s} seconds{color_end}
+        {color_start('37')}Progress{color_end}{color_start('32')}      -  {progress_m} minutes {progress_s} seconds{color_end}
+        {color_start('37')}Release date{color_end}{color_start('32')}  -  {track_release_date}{color_end}
+        {color_start('37')}From{color_end}{color_start('32')}          -  {track_type} - {album_name}{color_end}
+        {color_start('31')}Track details{color_end}
+        {color_start('32')}------------------------------{color_end}
+        {color_start('37')}Id{color_end}{color_start('32')}  - {track_id}{color_end}
+        {color_start('37')}URL{color_end}{color_start('32')} - {track_url}{color_end}
+        {color_start('37')}Image{color_end}{color_start('32')} - {track_image}{color_end}
+        """
+        )
+
+        if not eval(self.CONFIG["ANSI_COLORS"]):
+            ansi_color_escape = re.compile(r"\x1b\[\d{1,2}m")
+            strings = ansi_color_escape.sub("", strings)
+
+        strings = strings.strip().splitlines()
+
+        if eval(self.CONFIG["ASCII_IMAGE"]) or eval(self.CONFIG["USE_ASCII_LOGO"]):
+            if eval(self.CONFIG["ASCII_IMAGE"]):
+                width = self.CONFIG["ASCII_IMAGE_SIZE_WIDTH"]
+                ascii_str = (
+                    self.image_to_ascii_color(
+                        data["item"]["album"]["images"][0]["url"], int(width)
+                    )
+                    if eval(self.CONFIG["ASCII_IMAGE_COLOR"])
+                    else self.image_to_ascii(
+                        data["item"]["album"]["images"][0]["url"], int(width)
+                    )
+                ).splitlines()
+            elif eval(self.CONFIG["USE_ASCII_LOGO"]):
+                ascii_str = self.CONFIG["ASCII_LOGO"]
+
+            print()
+            for i, line in enumerate(ascii_str):
+                if eval(self.CONFIG["PRINT_DELAY_ACTIVE"]):
+                    time.sleep(float(self.CONFIG["PRINT_DELAY"]))
+                print(f"  {line.ljust(30)}  {strings[i] if i < len(strings) else ''}")
+            print()
         else:
-            console.print(
-                f"""[green]
-
-    ⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣶⣶⣶⣶⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀  [bold red]Current track[/bold red]
-    ⠀⠀⠀⠀⢀⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⡀⠀⠀⠀⠀  ------------------------------
-    ⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⠀⠀⠀  [bold white]Name[/bold white]          -  {track_name}
-    ⠀⢀⣾⣿⡿⠿⠛⠛⠛⠉⠉⠉⠉⠛⠛⠛⠿⠿⣿⣿⣿⣿⣿⣷⡀⠀  [bold white]Artits[/bold white]        -  {artist_names}
-    ⠀⣾⣿⣿⣇⠀⣀⣀⣠⣤⣤⣤⣤⣤⣀⣀⠀⠀⠀⠈⠙⠻⣿⣿⣷⠀  [bold white]Duration[/bold white]      -  {track_duration_m} minutes {track_duration_s} seconds
-    ⢠⣿⣿⣿⣿⡿⠿⠟⠛⠛⠛⠛⠛⠛⠻⠿⢿⣿⣶⣤⣀⣠⣿⣿⣿⡄  [bold white]Progress[/bold white]      -  {progress_m} minutes {progress_s} seconds
-    ⢸⣿⣿⣿⣿⣇⣀⣀⣤⣤⣤⣤⣤⣄⣀⣀⠀⠀⠉⠛⢿⣿⣿⣿⣿⡇  [bold white]Release date[/bold white]  -  {track_release_date} 
-    ⠘⣿⣿⣿⣿⣿⠿⠿⠛⠛⠛⠛⠛⠛⠿⠿⣿⣶⣦⣤⣾⣿⣿⣿⣿⠃  [bold white]From[/bold white]          -  {track_type} - {album_name}
-    ⠀⢿⣿⣿⣿⣿⣤⣤⣤⣤⣶⣶⣦⣤⣤⣄⡀⠈⠙⣿⣿⣿⣿⣿⡿⠀  
-    ⠀⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣾⣿⣿⣿⣿⡿⠁⠀  [bold red]Track details[/bold red]
-    ⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠀⠀⠀  ------------------------------
-    ⠀⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠁⠀⠀⠀⠀  [bold white]Id[/bold white]  - {track_id}
-    ⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠛⠿⠿⠿⠿⠛⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀  [bold white]URL[/bold white] - {track_url}
-        
-        """,
-                justify="left",
-            )
-
-    """Shorthands"""
-    prev = previous
-    vol = volume
-    curren = current
+            print()
+            for line in strings:
+                if eval(self.CONFIG["PRINT_DELAY_ACTIVE"]):
+                    time.sleep(float(self.CONFIG["PRINT_DELAY"]))
+                print(f"  {line}")
+            print()

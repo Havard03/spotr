@@ -2,11 +2,9 @@
 
 import base64
 import logging
-import os
 import sys
 import time
 import webbrowser
-import json
 
 import requests
 from yarl import URL
@@ -15,55 +13,8 @@ log = logging.getLogger()
 
 ACCOUNT_URL = URL.build(scheme="https", host="accounts.spotify.com")
 
-
 class API:
     """API class for sending all requests"""
-
-    def __init__(self):
-        try:
-            with open(
-                os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)), "config.json"
-                ),
-                "r",
-                encoding="utf-8",
-            ) as file:
-                self.CONFIG = json.load(file)
-        except FileNotFoundError:
-            log.critical("Config file not found!")
-            create_file = str(input("Do you wish to create the config file? y/n: "))
-            if create_file.lower() == "y":
-                self.CONFIG = {
-                    "path": os.path.dirname(os.path.realpath(__file__)),
-                    "refresh_token": "",
-                    "base_64": "",
-                    "key": "",
-                    "DEBUG": "False",
-                    "ASCII": "True",
-                    "ASCII_SIZE_WIDTH": "50",
-                    "ASCII_COLOR": "True",
-                    "ASCII_UNICODE": "True",
-                    "ASCII_CHARS": "@%#*+=-:.`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
-                    "PRINT_DELAY_ACTIVE": "True",
-                    "PRINT_DELAY": "0.01"
-                }
-                with open(
-                    os.path.join(
-                        os.path.dirname(os.path.realpath(__file__)), "config.json"
-                    ),
-                    "w",
-                    encoding="utf-8",
-                ) as file:
-                    json.dump(self.CONFIG, file, indent=4)
-                print("Starting spotify authentication process...")
-                self.authorise()
-
-    def write(self):
-        """Write json data"""
-        with open(
-            os.path.join(self.CONFIG["path"], "config.json"), "w", encoding="utf-8"
-        ) as file:
-            json.dump(self.CONFIG, file, indent=4)
 
     def request(self, method, url, headers=None, json=None):
         """Spotr request, with deafult headers"""
@@ -87,11 +38,11 @@ class API:
             sys.exit()
 
         try:
-            response.json()
+            data = response.json()
         except ValueError:
             return None
 
-        return response.json()
+        return data
 
     def refresh_key(self):
         """Refresh API key"""
@@ -116,7 +67,7 @@ class API:
             sys.exit()
         data = response.json()
         self.CONFIG["key"] = data["access_token"]
-        self.write()
+        self.write_config()
 
     def authorise(self):
         """Authenticate with Spotify API"""
@@ -170,5 +121,5 @@ class API:
 
         self.CONFIG["refresh_token"] = access_token_response_data["refresh_token"]
         self.CONFIG["base_64"] = client_creds_b64.decode()
-        self.write()
+        self.write_config()
         print("All done!")
