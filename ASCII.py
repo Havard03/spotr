@@ -48,13 +48,14 @@ class ASCII:
 
     def image_to_ascii_color(self, image_url, width=75):
         """Convert image to ASCII art with color."""
+        
         response = requests.get(image_url, timeout=10)
         image = Image.open(BytesIO(response.content))
 
         aspect_ratio = image.height / image.width
         new_height = int(width * aspect_ratio * 0.5)
         resized_image = image.resize((width, new_height))
-        pixels = resized_image.load()
+        pixels = resized_image.convert("RGB").load()
 
         ascii_art = ""
         for y in range(resized_image.height):
@@ -70,7 +71,7 @@ class ASCII:
                     exit()
                 char = "\u2588" if eval(self.CONFIG["ASCII_IMAGE_UNICODE"]) else "@"
                 ascii_art += self.rgb_to_ansi(r, g, b) + char
-            if y != resized_image.height - 1:  # Check if it's the last iteration
+            if y != resized_image.height - 1:
                 ascii_art += "\n"
 
         ascii_art += "\x1b[0m"

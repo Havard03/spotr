@@ -1,22 +1,26 @@
-""" API class """
+"""API class"""
 
 import base64
 import logging
 import sys
 import time
 import webbrowser
-
 import requests
 from yarl import URL
 
 log = logging.getLogger()
-
 ACCOUNT_URL = URL.build(scheme="https", host="accounts.spotify.com")
 
 class API:
     """API class for sending all requests"""
 
-    def request(self, method, url, headers=None, json=None):
+    def request(
+        self, 
+        method,
+        url,
+        headers=None,
+        json=None
+    ):
         """Spotr request, with deafult headers"""
         if headers is None:
             headers = {"Authorization": f"Bearer {self.CONFIG['key']}"}
@@ -26,14 +30,10 @@ class API:
         if response.status_code in (401, 400):
             self.refresh_key()
             headers = {"Authorization": f"Bearer {self.CONFIG['key']}"}
-            response = requests.request(
-                method, url, headers=headers, json=json, timeout=10
-            )
+            response = requests.request(method, url, headers=headers, json=json, timeout=10)
 
         if not response.ok:
-            log.warning(
-                "[bold red]request error - status-code: %d", response.status_code
-            )
+            log.warning("[bold red]request error - status-code: %d", response.status_code)
             log.info(response.json())
             sys.exit()
 
@@ -47,6 +47,7 @@ class API:
     def refresh_key(self):
         """Refresh API key"""
         url = ACCOUNT_URL / "api" / "token"
+        
         response = requests.post(
             url,
             data={

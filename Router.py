@@ -5,10 +5,12 @@ import time
 import webbrowser
 import logging
 import textwrap
+import inspect
 import questionary
 import yarl
 from rich.console import Console
 from yarl import URL
+from tqdm import tqdm
 
 from ASCII import ASCII
 from API import API
@@ -57,6 +59,7 @@ class Router(Configuration, API, Helpers, ASCII):
     def replay(self):
         """Replay/Restart currently playing song"""
         self.request("PUT", str(URL(API_PLAYER / "seek").with_query(position_ms=0)))
+        self.current()
 
     def seek(self, progress):
         """Seek posistion for track in seconds"""
@@ -104,6 +107,7 @@ class Router(Configuration, API, Helpers, ASCII):
                 )
             ),
         )
+    vol = volume
 
     def playback(self):
         """Set playback state"""
@@ -325,7 +329,7 @@ class Router(Configuration, API, Helpers, ASCII):
         return
 
     def recommend(self):
-        """Play random / recommended track based on recent tracks"""
+        """Play random / recommended tracks based on recent tracks"""
         recent = self.request(
             "GET", str(URL(API_PLAYER / "recently-played").with_query(limit=5))
         )
@@ -377,24 +381,38 @@ class Router(Configuration, API, Helpers, ASCII):
 
     def current(self):
         """Display information about the current track"""
+        if inspect.stack()[1].filename == inspect.getfile(inspect.currentframe()):
+            timeout = float(self.CONFIG["API_PROCESS_DELAY"])
+            num_updates = int(timeout * 10)
+            update_increment = 1 / 10  
+            with tqdm(
+                total=num_updates,
+                desc="API Process Delay",
+                unit="update",
+                leave=True
+            ) as pbar:
+                for i in range(num_updates):
+                    time.sleep(update_increment)
+                    pbar.update(1)
+            print("\033[F\033[K", end="")
+
         data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
 
+        if data["currently_playing_type"] not in ("track"):
+            log.error("Playing unsupported type - %s", data['currently_playing_type'])
+            return
+
         if data is None or data["item"] is None:
-            console.log("[bold red]No data")
+            log.error("No data")
             return
 
         current_track = data["item"]
         album_data = current_track["album"]
-        artist_names = ", ".join(
-            [artist["name"] for artist in current_track["artists"]]
-        )
-
+        artist_names = ", ".join([artist["name"] for artist in current_track["artists"]])
         track_duration_ms = current_track["duration_ms"]
         track_duration_m, track_duration_s = divmod(track_duration_ms // 1000, 60)
-
         progress_ms = data["progress_ms"]
         progress_m, progress_s = divmod(progress_ms // 1000, 60)
-
         track_id = current_track["id"]
         track_name = current_track["name"]
         track_type = album_data["album_type"]
