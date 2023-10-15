@@ -22,6 +22,7 @@ class Configuration:
                 encoding="utf-8",
             ) as file:
                 self.CONFIG = json.load(file)
+                self.validate_config()
         except FileNotFoundError:
             log.critical("Config file not found!")
             create_file = str(
@@ -36,6 +37,7 @@ class Configuration:
                     "base_64": "",
                     "key": "",
                     "DEBUG": "False",
+                    "API_PROCESS_DELAY": "2",
                     "ANSI_COLORS": "True",
                     "USE_ASCII_LOGO": "True",
                     "LOG_TRACK_URIS": "True",
@@ -47,6 +49,7 @@ class Configuration:
                     "PRINT_DELAY_ACTIVE": "True",
                     "PRINT_DELAY": "0.01",
                     "IGNORED_FUNCTIONS": [
+                        "validate_config",
                         "parse_functions",
                         "rgb_to_ansi",
                         "resize_image",
@@ -160,3 +163,36 @@ class Configuration:
             os.path.join(self.CONFIG["path"], "config.json"), "w", encoding="utf-8"
         ) as file:
             json.dump(self.CONFIG, file, indent=4)
+
+    def validate_config(self):
+        """Validate config.json"""
+        required_keys = [
+            "path",
+            "refresh_token",
+            "base_64",
+            "key",
+            "DEBUG",
+            "API_PROCESS_DELAY",
+            "ANSI_COLORS",
+            "USE_ASCII_LOGO",
+            "LOG_TRACK_URIS",
+            "ASCII_IMAGE",
+            "ASCII_IMAGE_SIZE_WIDTH",
+            "ASCII_IMAGE_COLOR",
+            "ASCII_IMAGE_UNICODE",
+            "ASCII_IMAGE_CHARS",
+            "PRINT_DELAY_ACTIVE",
+            "PRINT_DELAY",
+            "IGNORED_FUNCTIONS",
+        ]
+        config_keys = set(self.CONFIG.keys())
+        if not set(required_keys).issubset(config_keys):
+            missing_keys = set(required_keys) - config_keys
+            log.error(
+                "The following keys are missing in the config.json: %s",
+                ", ".join(missing_keys),
+            )
+            log.info("If you have an old config file, delete it and run any command")
+            sys.exit(1)
+        else:
+            return

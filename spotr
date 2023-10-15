@@ -68,7 +68,7 @@ elif len(sys.argv) >= 2:
                 getattr(route, sys.argv[1])(*sys.argv[2:])
             except AttributeError:
                 message = f"[bold red]Invalid argument - {sys.argv[1]}"
-                ERROR: log = (
+                EdRROR: log = (
                     log.exception(message)
                     if eval(CONFIG["DEBUG"])
                     else log.error(message)
