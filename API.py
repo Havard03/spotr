@@ -9,13 +9,15 @@ import requests
 from yarl import URL
 
 log = logging.getLogger()
-ACCOUNT_URL = URL.build(scheme="https", host="accounts.spotify.com")
+ACCOUNT_URL_SPOTIFY = URL.build(scheme="https", host="accounts.spotify.com")
+ACCOUNT_URL_GENIUS = "https://api.genius.com/oauth/authorize"  # Genius Auth URL
+
 
 class API:
     """API class for sending all requests"""
 
     def request(
-        self, 
+        self,
         method,
         url,
         headers=None,
@@ -25,15 +27,18 @@ class API:
         if headers is None:
             headers = {"Authorization": f"Bearer {self.CONFIG['key']}"}
 
-        response = requests.request(method, url, headers=headers, json=json, timeout=10)
+        response = requests.request(
+            method, url, headers=headers, json=json, timeout=10)
 
         if response.status_code in (401, 400):
             self.refresh_key()
             headers = {"Authorization": f"Bearer {self.CONFIG['key']}"}
-            response = requests.request(method, url, headers=headers, json=json, timeout=10)
+            response = requests.request(
+                method, url, headers=headers, json=json, timeout=10)
 
         if not response.ok:
-            log.warning("[bold red]request error - status-code: %d", response.status_code)
+            log.warning("[bold red]request error - status-code: %d",
+                        response.status_code)
             log.info(response.json())
             sys.exit()
 
@@ -46,8 +51,8 @@ class API:
 
     def refresh_key(self):
         """Refresh API key"""
-        url = ACCOUNT_URL / "api" / "token"
-        
+        url = ACCOUNT_URL_SPOTIFY / "api" / "token"
+
         response = requests.post(
             url,
             data={
@@ -71,17 +76,32 @@ class API:
         self.write_config()
 
     def authorise(self):
-        """Authenticate with Spotify API"""
-        auth_url = ACCOUNT_URL / "authorize"
-        token_url = ACCOUNT_URL / "api" / "token"
+        """Authenticate with Spotify API and Genius API"""
+        self.authorise_spotify()
+        self.authorise_genius()
 
-        client_id = str(input("Spotify-App Client id: "))
-        client_secret = str(input("Spotify-App Client secret: "))
+    def authorise_genius(self):
+        """Collect Genius API client access token"""
+        genius_access_token = str(
+            input("Enter your Genius-App Client Access Token: "))
+
+        # Store the Genius access token in your CONFIG
+        self.CONFIG["genius_access_token"] = genius_access_token
+        self.write_config()
+        print("Genius Access Token stored successfully!")
+
+    def authorise_spotify(self):
+        """Authenticate with Spotify API"""
+        spotify_auth_url = ACCOUNT_URL_SPOTIFY / "authorize"
+        spotify_token_url = ACCOUNT_URL_SPOTIFY / "api" / "token"
+
+        spotify_client_id = str(input("Spotify-App Client id: "))
+        spotify_client_secret = str(input("Spotify-App Client secret: "))
 
         auth_request = requests.get(
-            auth_url,
+            spotify_auth_url,
             {
-                "client_id": client_id,
+                "client_id": spotify_client_id,
                 "response_type": "code",
                 "redirect_uri": "https://www.google.com/",
                 "scope": "playlist-read-collaborative playlist-read-private user-read-playback-state user-modify-playback-state user-read-currently-playing user-read-recently-played playlist-modify-private playlist-modify-public",
@@ -97,7 +117,7 @@ class API:
 
         auth_code = str(input("Enter code from the URL: "))
 
-        client_creds = f"{client_id}:{client_secret}"
+        client_creds = f"{spotify_client_id}:{spotify_client_secret}"
         client_creds_b64 = base64.b64encode(client_creds.encode())
 
         headers = {
@@ -111,7 +131,7 @@ class API:
         }
 
         access_token_request = requests.post(
-            url=token_url, data=payload, headers=headers, timeout=10
+            url=spotify_token_url, data=payload, headers=headers, timeout=10
         )
 
         if not access_token_request.ok:

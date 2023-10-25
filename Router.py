@@ -17,6 +17,8 @@ from API import API
 from Helpers import Helpers
 from Configuration import Configuration
 
+import lyricsgenius
+
 log = logging.getLogger()
 console = Console()
 
@@ -24,8 +26,10 @@ SPOTIFY_LIMIT = 50
 QUSTIONARY_LIMIT = 36
 API_BASE = yarl.URL("api.spotify.com")
 API_VERSION = yarl.URL("v1")
-API_PLAYER = yarl.URL("https://api.spotify.com") / str(API_VERSION) / "me" / "player"
+API_PLAYER = yarl.URL("https://api.spotify.com") / \
+    str(API_VERSION) / "me" / "player"
 API_BASE_VERSION = yarl.URL("https://api.spotify.com") / str(API_VERSION)
+
 
 class Router(Configuration, API, Helpers, ASCII):
     """Available Spotr commands"""
@@ -58,7 +62,8 @@ class Router(Configuration, API, Helpers, ASCII):
 
     def replay(self):
         """Replay/Restart currently playing song"""
-        self.request("PUT", str(URL(API_PLAYER / "seek").with_query(position_ms=0)))
+        self.request("PUT", str(
+            URL(API_PLAYER / "seek").with_query(position_ms=0)))
         self.current()
 
     def seek(self, progress):
@@ -83,7 +88,8 @@ class Router(Configuration, API, Helpers, ASCII):
             erase_when_done=True,
             use_shortcuts=True,
         ).ask()
-        self.request("PUT", str(URL(API_PLAYER / "shuffle").with_query(state=state)))
+        self.request("PUT", str(
+            URL(API_PLAYER / "shuffle").with_query(state=state)))
 
     def volume(self, volume=None):
         """Ajust volume"""
@@ -119,7 +125,8 @@ class Router(Configuration, API, Helpers, ASCII):
         ).ask()
         if state is None:
             return
-        self.request("PUT", str(URL(API_PLAYER / "repeat").with_query(state=state)))
+        self.request("PUT", str(
+            URL(API_PLAYER / "repeat").with_query(state=state)))
         return
 
     def queue(self):
@@ -201,7 +208,8 @@ class Router(Configuration, API, Helpers, ASCII):
             str(URL(API_BASE_VERSION / "me/playlists").with_query(limit=SPOTIFY_LIMIT)),
         )
 
-        current_song = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
+        current_song = self.request("GET", str(
+            URL(API_PLAYER / "currently-playing")))
 
         choices = self.parse_items(
             data,
@@ -384,7 +392,7 @@ class Router(Configuration, API, Helpers, ASCII):
         if inspect.stack()[1].filename == inspect.getfile(inspect.currentframe()):
             timeout = float(self.CONFIG["API_PROCESS_DELAY"])
             num_updates = int(timeout * 10)
-            update_increment = 1 / 10  
+            update_increment = 1 / 10
             with tqdm(
                 total=num_updates,
                 desc="API Process Delay",
@@ -399,7 +407,8 @@ class Router(Configuration, API, Helpers, ASCII):
         data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
 
         if data["currently_playing_type"] not in ("track"):
-            log.error("Playing unsupported type - %s", data['currently_playing_type'])
+            log.error("Playing unsupported type - %s",
+                      data['currently_playing_type'])
             return
 
         if data is None or data["item"] is None:
@@ -408,9 +417,11 @@ class Router(Configuration, API, Helpers, ASCII):
 
         current_track = data["item"]
         album_data = current_track["album"]
-        artist_names = ", ".join([artist["name"] for artist in current_track["artists"]])
+        artist_names = ", ".join([artist["name"]
+                                 for artist in current_track["artists"]])
         track_duration_ms = current_track["duration_ms"]
-        track_duration_m, track_duration_s = divmod(track_duration_ms // 1000, 60)
+        track_duration_m, track_duration_s = divmod(
+            track_duration_ms // 1000, 60)
         progress_ms = data["progress_ms"]
         progress_m, progress_s = divmod(progress_ms // 1000, 60)
         track_id = current_track["id"]
@@ -428,15 +439,15 @@ class Router(Configuration, API, Helpers, ASCII):
             f"""
         {color_start('31')}Current track{color_end}
         {color_start('32')}------------------------------{color_end}
-        {color_start('37')}Name{color_end}{color_start('32')}          -  {track_name}{color_end}
-        {color_start('37')}Artits{color_end}{color_start('32')}        -  {artist_names}{color_end}
-        {color_start('37')}Duration{color_end}{color_start('32')}      -  {track_duration_m} minutes {track_duration_s} seconds{color_end}
-        {color_start('37')}Progress{color_end}{color_start('32')}      -  {progress_m} minutes {progress_s} seconds{color_end}
-        {color_start('37')}Release date{color_end}{color_start('32')}  -  {track_release_date}{color_end}
-        {color_start('37')}From{color_end}{color_start('32')}          -  {track_type} - {album_name}{color_end}
+        {color_start('37')}Name{color_end}{color_start('32')} - {track_name}{color_end}
+        {color_start('37')}Artits{color_end}{color_start('32')} - {artist_names}{color_end}
+        {color_start('37')}Duration{color_end}{color_start('32')} - {track_duration_m} minutes {track_duration_s} seconds{color_end}
+        {color_start('37')}Progress{color_end}{color_start('32')} - {progress_m} minutes {progress_s} seconds{color_end}
+        {color_start('37')}Release date{color_end}{color_start('32')} - {track_release_date}{color_end}
+        {color_start('37')}From{color_end}{color_start('32')} - {track_type} - {album_name}{color_end}
         {color_start('31')}Track details{color_end}
         {color_start('32')}------------------------------{color_end}
-        {color_start('37')}Id{color_end}{color_start('32')}  - {track_id}{color_end}
+        {color_start('37')}Id{color_end}{color_start('32')} - {track_id}{color_end}
         {color_start('37')}URL{color_end}{color_start('32')} - {track_url}{color_end}
         {color_start('37')}Image{color_end}{color_start('32')} - {track_image}{color_end}
         """
@@ -467,7 +478,8 @@ class Router(Configuration, API, Helpers, ASCII):
             for i, line in enumerate(ascii_str):
                 if eval(self.CONFIG["PRINT_DELAY_ACTIVE"]):
                     time.sleep(float(self.CONFIG["PRINT_DELAY"]))
-                print(f"  {line.ljust(30)}  {strings[i] if i < len(strings) else ''}")
+                print(f"  {line.ljust(30)}  {
+                      strings[i] if i < len(strings) else ''}")
             print()
         else:
             print()
@@ -476,3 +488,30 @@ class Router(Configuration, API, Helpers, ASCII):
                     time.sleep(float(self.CONFIG["PRINT_DELAY"]))
                 print(f"  {line}")
             print()
+
+    def lyrics(self):
+        """Show lyrics for the current track"""
+        data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
+        if data is None or data["item"] is None:
+            log.error("No data")
+            return
+
+        current_track = data["item"]
+        artist_names = ", ".join([artist["name"]
+                                 for artist in current_track["artists"]])
+        track_name = current_track["name"]
+
+        genius = lyricsgenius.Genius("your_genius_api_token_here")
+        song = genius.search_song(track_name, artist_names)
+
+        if song:
+            lyrics = song.lyrics
+            # Remove annotations and other unwanted text
+            clean_lyrics = re.sub(r'\[.*?\]', '', lyrics)  # Remove [...]
+            # Remove 'Embed' and anything after it
+            clean_lyrics = re.sub(r'Embed.*', '', clean_lyrics)
+            # Remove any trailing digits
+            clean_lyrics = re.sub(r'\d+$', '', clean_lyrics)
+            print(clean_lyrics)
+        else:
+            print(f"No lyrics found for {track_name} by {artist_names}")

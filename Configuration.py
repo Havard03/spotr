@@ -9,6 +9,7 @@ import questionary
 
 log = logging.getLogger()
 
+
 class Configuration:
     """Configuration class"""
 
@@ -36,6 +37,7 @@ class Configuration:
                     "refresh_token": "",
                     "base_64": "",
                     "key": "",
+                    "genius_access_token": "",
                     "DEBUG": "False",
                     "API_PROCESS_DELAY": "2",
                     "ANSI_COLORS": "True",
@@ -94,11 +96,13 @@ class Configuration:
                         "__str__",
                         "__subclasshook__",
                         "__weakref__",
-                    ],
-                }
+                        "authorise_spotify",
+                        "authorise_genius",
+                    ], }
                 with open(
                     os.path.join(
-                        os.path.dirname(os.path.realpath(__file__)), "config.json"
+                        os.path.dirname(os.path.realpath(
+                            __file__)), "config.json"
                     ),
                     "w",
                     encoding="utf-8",
@@ -171,6 +175,7 @@ class Configuration:
             "refresh_token",
             "base_64",
             "key",
+            "genius_access_token",
             "DEBUG",
             "API_PROCESS_DELAY",
             "ANSI_COLORS",
@@ -192,7 +197,8 @@ class Configuration:
                 "The following keys are missing in the config.json: %s",
                 ", ".join(missing_keys),
             )
-            log.info("If you have an old config file, delete it and run any command")
+            log.info(
+                "If you have an old config file, delete it and run any command")
             sys.exit(1)
         else:
             return
