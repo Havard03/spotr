@@ -79,6 +79,8 @@ CONFIG = {
         "__str__",
         "__subclasshook__",
         "__weakref__",
+        "authorise_spotify",
+        "authorise_genius"
     ], }
 with open(os.path.join(PATH, "config.json"), "w", encoding="utf-8") as file:
     json.dump(CONFIG, file, indent=4)
