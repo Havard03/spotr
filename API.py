@@ -6,11 +6,11 @@ import sys
 import time
 import webbrowser
 import requests
-from yarl import URL
+from urllib.parse import urljoin
 
 log = logging.getLogger()
-ACCOUNT_URL_SPOTIFY = URL.build(scheme="https", host="accounts.spotify.com")
-ACCOUNT_URL_GENIUS = "https://api.genius.com/oauth/authorize"  # Genius Auth URL
+ACCOUNT_BASE_URL_SPOTIFY = "https://accounts.spotify.com"
+ACCOUNT_URL_GENIUS = "https://api.genius.com/oauth/authorize"
 
 
 class API:
@@ -51,7 +51,7 @@ class API:
 
     def refresh_key(self):
         """Refresh API key"""
-        url = ACCOUNT_URL_SPOTIFY / "api" / "token"
+        url = urljoin(ACCOUNT_BASE_URL_SPOTIFY, "api/token")
 
         response = requests.post(
             url,
@@ -92,8 +92,9 @@ class API:
 
     def authorise_spotify(self):
         """Authenticate with Spotify API"""
-        spotify_auth_url = ACCOUNT_URL_SPOTIFY / "authorize"
-        spotify_token_url = ACCOUNT_URL_SPOTIFY / "api" / "token"
+        spotify_auth_url = urljoin(ACCOUNT_BASE_URL_SPOTIFY, "authorize")
+        spotify_token_url = urljoin(ACCOUNT_BASE_URL_SPOTIFY, "api/token")
+
 
         spotify_client_id = str(input("Spotify-App Client id: "))
         spotify_client_secret = str(input("Spotify-App Client secret: "))

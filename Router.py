@@ -7,9 +7,8 @@ import logging
 import textwrap
 import inspect
 import questionary
-import yarl
 from rich.console import Console
-from yarl import URL
+from urllib.parse import urljoin
 from tqdm import tqdm
 
 from ASCII import ASCII
@@ -24,11 +23,10 @@ console = Console()
 
 SPOTIFY_LIMIT = 50
 QUSTIONARY_LIMIT = 36
-API_BASE = yarl.URL("api.spotify.com")
-API_VERSION = yarl.URL("v1")
-API_PLAYER = yarl.URL("https://api.spotify.com") / \
-    str(API_VERSION) / "me" / "player"
-API_BASE_VERSION = yarl.URL("https://api.spotify.com") / str(API_VERSION)
+API_BASE = "https://api.spotify.com"
+API_VERSION = "v1"
+API_PLAYER = urljoin(API_BASE, f"{API_VERSION}/me/player")
+API_BASE_VERSION = urljoin(API_BASE, API_VERSION)
 
 
 class Router(Configuration, API, Helpers, ASCII):
@@ -40,42 +38,47 @@ class Router(Configuration, API, Helpers, ASCII):
 
     def next(self):
         """Play next track"""
-        self.request("POST", str(URL(API_PLAYER / "next")))
+        next_url = urljoin(API_PLAYER, "next")
+        self.request("POST", next_url)
         self.current()
 
     def previous(self):
         """Play previous track"""
-        self.request("POST", str(URL(API_PLAYER / "previous")))
+        previous_url = urljoin(API_PLAYER, "previous")
+        self.request("POST", previous_url)
         self.current()
 
     def stop(self):
         """Stop/Pause playing"""
-        self.request("PUT", str(URL(API_PLAYER / "pause")))
+        stop_url = urljoin(API_PLAYER, "pause")
+        self.request("PUT", stop_url)
 
     def start(self):
         """Start/Resume playing"""
-        self.request("PUT", str(URL(API_PLAYER / "play")))
+        start_url = urljoin(API_PLAYER, "play")
+        self.request("PUT", start_url)
 
     def play(self, json=None):
         """Play song or collection of songs"""
-        self.request("PUT", str(URL(API_PLAYER / "play")), json=json)
+        play_url = urljoin(API_PLAYER, "play")
+        self.request("PUT", play_url, json=json)
 
     def replay(self):
         """Replay/Restart currently playing song"""
-        self.request("PUT", str(
-            URL(API_PLAYER / "seek").with_query(position_ms=0)))
+        replay_url = urljoin(API_PLAYER, "seek").with_query(position_ms=0)
+        self.request("PUT", replay_url)
         self.current()
 
     def seek(self, progress):
         """Seek posistion for track in seconds"""
-        self.request(
-            "PUT",
-            str(URL(API_PLAYER / "seek").with_query(position_ms=int(progress) * 1000)),
-        )
+        seek_url = urljoin(API_PLAYER, "seek").with_query(
+            position_ms=int(progress) * 1000)
+        self.request("PUT", seek_url)
 
     def web(self):
         """Open currently playing track in a broswer"""
-        data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
+        web_url = urljoin(API_PLAYER, "currently-playing")
+        data = self.request("GET", web_url)
         if data is None:
             return
         webbrowser.open_new_tab(data["item"]["external_urls"]["spotify"])
@@ -88,11 +91,14 @@ class Router(Configuration, API, Helpers, ASCII):
             erase_when_done=True,
             use_shortcuts=True,
         ).ask()
-        self.request("PUT", str(
-            URL(API_PLAYER / "shuffle").with_query(state=state)))
+        shuffle_url = urljoin(API_PLAYER, "shuffle").with_query(state=state)
+        self.request("PUT", shuffle_url)
 
     def volume(self, volume=None):
         """Ajust volume"""
+        volume_url = urljoin(API_PLAYER, "volume").with_query(
+            volume_percent=str(volume).replace("%", "")
+        )
         if volume is None:
             volume = questionary.select(
                 "Choose volume precentage",
@@ -106,13 +112,7 @@ class Router(Configuration, API, Helpers, ASCII):
             elif int(volume) > 100:
                 volume = 100
         self.request(
-            "PUT",
-            str(
-                URL(API_PLAYER / "volume").with_query(
-                    volume_percent=str(volume).replace("%", "")
-                )
-            ),
-        )
+            "PUT", volume_url)
     vol = volume
 
     def playback(self):
@@ -125,22 +125,22 @@ class Router(Configuration, API, Helpers, ASCII):
         ).ask()
         if state is None:
             return
-        self.request("PUT", str(
-            URL(API_PLAYER / "repeat").with_query(state=state)))
-        return
+        playback_url = urljoin(API_PLAYER, "repeat").with_query(state=state)
+        self.request("PUT", playback_url)
 
     def queue(self):
         """Get Queue"""
-        data = self.request("GET", str(URL(API_PLAYER / "queue")))
+        queue_url = urljoin(API_PLAYER, "queue")
+        data = self.request("GET", queue_url)
         for track in data["queue"]:
             console.print(f"[bold green]{track['name']}")
 
     def recent(self):
         """Get recently played tracks"""
+        recent_url = urljoin(
+            API_PLAYER, "recently-played").with_query(limit=QUSTIONARY_LIMIT)
         data = self.request(
-            "GET",
-            str(URL(API_PLAYER / "recently-played").with_query(limit=QUSTIONARY_LIMIT)),
-        )
+            "GET", recent_url)
 
         choices = self.parse_items(
             data,
@@ -168,14 +168,11 @@ class Router(Configuration, API, Helpers, ASCII):
 
     def playlist(self):
         """Choose a playlist"""
-        data = self.request(
-            "GET",
-            str(
-                URL(API_BASE_VERSION / "me" / "playlists").with_query(
-                    limit=SPOTIFY_LIMIT
-                )
-            ),
+        playlist_url = urljoin(API_BASE_VERSION, "me", "playlists").with_query(
+            limit=SPOTIFY_LIMIT
         )
+        data = self.request(
+            "GET", playlist_url)
 
         choices = self.parse_items(
             data,
@@ -203,14 +200,20 @@ class Router(Configuration, API, Helpers, ASCII):
     def playlistadd(self):
         """Add currently playing track to playlist"""
 
-        data = self.request(
-            "GET",
-            str(URL(API_BASE_VERSION / "me/playlists").with_query(limit=SPOTIFY_LIMIT)),
-        )
+        # Getting the list of playlists
+        playlists_url = urljoin(API_BASE_VERSION, "me/playlists")
+        data = self.request("GET", playlists_url, params={"limit": SPOTIFY_LIMIT})
 
-        current_song = self.request("GET", str(
-            URL(API_PLAYER / "currently-playing")))
+        # Getting the currently playing song
+        current_song_url = urljoin(API_PLAYER, "currently-playing")
+        current_song = self.request("GET", current_song_url)
 
+        # Check if there is a currently playing song
+        if not current_song or 'item' not in current_song or not current_song['item']:
+            console.print("[bold red]No song is currently playing.")
+            return
+
+        # Parsing the items to form choices for the user
         choices = self.parse_items(
             data,
             accessor=["items"],
@@ -219,8 +222,9 @@ class Router(Configuration, API, Helpers, ASCII):
             artists_value=False,
         )
 
+        # User selects a playlist
         selected = questionary.select(
-            "what playlist do you want to add track to?",
+            "What playlist do you want to add the track to?",
             choices=choices,
             erase_when_done=True,
             use_arrow_keys=True,
@@ -230,15 +234,9 @@ class Router(Configuration, API, Helpers, ASCII):
         if selected is None:
             return
 
-        self.request(
-            "POST",
-            str(
-                URL(API_BASE_VERSION / "playlists" / selected / "tracks").with_query(
-                    uris=current_song["item"]["uri"]
-                )
-            ),
-        )
-        return
+        # Adding the current song to the selected playlist
+        add_song_url = urljoin(API_BASE_VERSION, f"playlists/{selected}/tracks")
+        self.request("POST", add_song_url, json={"uris": [current_song["item"]["uri"]]})
 
     def search(self, *query):
         """Search for anything on spotify, Types - track, playlist, album"""
@@ -296,14 +294,12 @@ class Router(Configuration, API, Helpers, ASCII):
             search_type = query[0]
             query.pop(0)
 
-        data = self.request(
-            "GET",
-            str(
-                URL(API_BASE_VERSION / "search").with_query(
-                    q=" ".join(query), type=search_type, limit=QUSTIONARY_LIMIT
-                )
-            ),
+        search_url = urljoin(API_BASE_VERSION, "search").with_query(
+            q=" ".join(query), type=search_type, limit=QUSTIONARY_LIMIT
         )
+
+        data = self.request(
+            "GET", search_url)
 
         choices = self.parse_items(
             data,
@@ -338,54 +334,65 @@ class Router(Configuration, API, Helpers, ASCII):
 
     def recommend(self):
         """Play random / recommended tracks based on recent tracks"""
-        recent = self.request(
-            "GET", str(URL(API_PLAYER / "recently-played").with_query(limit=5))
-        )
+        # Fetching recently played tracks
+        recently_played_url = urljoin(API_PLAYER, "recently-played")
+        recent = self.request("GET", recently_played_url, params={"limit": 5})
 
-        seed_arists = []
-        seed_generes = ["all"]
+        seed_artists = []
+        seed_genres = ["all"]  # Assuming 'all' is a valid genre for the Spotify API
         seed_tracks = []
 
-        for track in recent["items"]:
+        # Extracting seed values for recommendation
+        for track in recent.get("items", []):
             seed_tracks.append(track["track"]["id"])
-            seed_arists.append(track["track"]["artists"][0]["id"])
+            seed_artists.append(track["track"]["artists"][0]["id"])
 
+        # Fetching recommended tracks
+        recommendations_url = urljoin(API_BASE_VERSION, "recommendations")
         recommended = self.request(
             "GET",
-            str(
-                URL(API_BASE_VERSION / "recommendations").with_query(
-                    {
-                        "seed_arists": ",".join(seed_arists),
-                        "seed_generes": ",".join(seed_generes),
-                        "seed_tracks": ",".join(seed_tracks),
-                        "limit": 5,
-                    }
-                )
-            ),
+            recommendations_url,
+            params={
+                "seed_artists": ",".join(seed_artists),
+                "seed_genres": ",".join(seed_genres),
+                "seed_tracks": ",".join(seed_tracks),
+                "limit": 5,
+            }
         )
-        results = []
-        for track in recommended["tracks"]:
-            results.append(track["uri"])
-        json = {"uris": results, "offset": {"position": "0"}}
 
-        self.play(json=json)
-        self.current()
+        results = []
+        for track in recommended.get("tracks", []):
+            results.append(track["uri"])
+
+        if results:
+            self.play(json={"uris": results})
+            self.current()
+        else:
+            console.print("[bold red]No recommendations found based on recent tracks.")
+
 
     def ascii(self, width=100):
         """Ascii image for current track"""
-        data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
+        currently_playing_url = urljoin(API_PLAYER, "currently-playing")
+        data = self.request("GET", currently_playing_url)
+
+        # Check if there is data and a currently playing track
+        if not data or 'item' not in data or not data['item']:
+            print("No track is currently playing or track data is incomplete.")
+            return
+
+        track_image_url = data["item"]["album"]["images"][0]["url"]
+
+        # Generate ASCII art based on the configuration
         ascii_str = (
-            self.image_to_ascii_color(
-                data["item"]["album"]["images"][0]["url"], int(width)
-            )
+            self.image_to_ascii_color(track_image_url, int(width))
             if eval(self.CONFIG["ASCII_IMAGE_COLOR"])
-            else self.image_to_ascii(
-                data["item"]["album"]["images"][0]["url"], int(width)
-            )
+            else self.image_to_ascii(track_image_url, int(width))
         )
-        lines = ascii_str.splitlines()
-        for line in lines:
-            print(line)
+
+        # Print each line of the ASCII art
+        print(ascii_str)
+
 
     def current(self):
         """Display information about the current track"""
@@ -404,15 +411,15 @@ class Router(Configuration, API, Helpers, ASCII):
                     pbar.update(1)
             print("\033[F\033[K", end="")
 
-        data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
+        currently_playing_url = urljoin(API_PLAYER, "currently-playing")
+        data = self.request("GET", currently_playing_url)
 
-        if data["currently_playing_type"] not in ("track"):
-            log.error("Playing unsupported type - %s",
-                      data['currently_playing_type'])
+        if not data or 'item' not in data or not data['item']:
+            log.error("No track is currently playing or track data is incomplete.")
             return
 
-        if data is None or data["item"] is None:
-            log.error("No data")
+        if data.get("currently_playing_type") != "track":
+            log.error("Playing unsupported type - %s", data.get('currently_playing_type'))
             return
 
         current_track = data["item"]
@@ -491,14 +498,15 @@ class Router(Configuration, API, Helpers, ASCII):
 
     def lyrics(self):
         """Show lyrics for the current track"""
-        data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
-        if data is None or data["item"] is None:
-            log.error("No data")
+        currently_playing_url = urljoin(API_PLAYER, "currently-playing")
+        data = self.request("GET", currently_playing_url)
+
+        if not data or 'item' not in data or not data['item']:
+            log.error("No data available for the current track.")
             return
 
         current_track = data["item"]
-        artist_names = ", ".join([artist["name"]
-                                 for artist in current_track["artists"]])
+        artist_names = ", ".join([artist["name"] for artist in current_track["artists"]])
         track_name = current_track["name"]
 
         genius = lyricsgenius.Genius("your_genius_api_token_here")
@@ -508,10 +516,9 @@ class Router(Configuration, API, Helpers, ASCII):
             lyrics = song.lyrics
             # Remove annotations and other unwanted text
             clean_lyrics = re.sub(r'\[.*?\]', '', lyrics)  # Remove [...]
-            # Remove 'Embed' and anything after it
+            # Optionally, remove 'Embed' and anything after it
             clean_lyrics = re.sub(r'Embed.*', '', clean_lyrics)
-            # Remove any trailing digits
-            clean_lyrics = re.sub(r'\d+$', '', clean_lyrics)
             print(clean_lyrics)
         else:
             print(f"No lyrics found for {track_name} by {artist_names}")
+
