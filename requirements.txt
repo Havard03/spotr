@@ -3,5 +3,4 @@ questionary==2.0.1
 requests==2.28.1
 rich==13.6.0
 tqdm==4.66.1
-yarl==1.9.2
 lyricsgenius==3.0.1
