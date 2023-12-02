@@ -1,6 +1,7 @@
 """ Router Class """
 
 import re
+import os
 import time
 import webbrowser
 import logging
@@ -328,6 +329,26 @@ class Router(Configuration, API, Helpers, ASCII):
         self.current()
         return
 
+    def qsearch(self, *query):
+        """Quicksearch for tracks"""
+        if not query:
+            raise TypeError
+
+        data = self.request(
+            "GET",
+            str(
+                URL(API_BASE_VERSION / "search").with_query(
+                    q=" ".join(query), type="track", limit=1
+                )
+            ),
+        )
+        json_id = [data['tracks']['items'][0]['uri']]
+        json = {"uris": json_id, "offset": {"position": "0"}}
+        self.play(json=json)
+        self.current()
+        return
+
+
     def recommend(self):
         """Play random / recommended tracks based on recent tracks"""
         recent = self.request(
@@ -398,12 +419,12 @@ class Router(Configuration, API, Helpers, ASCII):
 
         data = self.request("GET", str(URL(API_PLAYER / "currently-playing")))
 
-        if data["currently_playing_type"] not in ("track"):
-            log.error("Playing unsupported type - %s", data['currently_playing_type'])
-            return
-
         if data is None or data["item"] is None:
             log.error("No data")
+            return
+
+        if data["currently_playing_type"] not in ("track"):
+            log.error("Playing unsupported type - %s", data['currently_playing_type'])
             return
 
         current_track = data["item"]
@@ -442,9 +463,10 @@ class Router(Configuration, API, Helpers, ASCII):
         """
         )
 
+        ansi_color_escape = re.compile(r"\x1b\[\d{1,2}m")
+        strings_no_color = ansi_color_escape.sub("", strings)
         if not eval(self.CONFIG["ANSI_COLORS"]):
-            ansi_color_escape = re.compile(r"\x1b\[\d{1,2}m")
-            strings = ansi_color_escape.sub("", strings)
+            strings = strings_no_color
 
         strings = strings.strip().splitlines()
 
@@ -462,12 +484,11 @@ class Router(Configuration, API, Helpers, ASCII):
                 ).splitlines()
             elif eval(self.CONFIG["USE_ASCII_LOGO"]):
                 ascii_str = self.CONFIG["ASCII_LOGO"]
-
             print()
             for i, line in enumerate(ascii_str):
                 if eval(self.CONFIG["PRINT_DELAY_ACTIVE"]):
                     time.sleep(float(self.CONFIG["PRINT_DELAY"]))
-                print(f"  {line.ljust(30)}  {strings[i] if i < len(strings) else ''}")
+                print(f"  {line}  {strings[i] if i < len(strings) else ''}")
             print()
         else:
             print()
