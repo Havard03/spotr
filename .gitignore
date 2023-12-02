@@ -7,5 +7,5 @@ spotr
 .tox
 .cache
 .idea
-spotr_py/config.json
-spotr_py/__pycache__
+spotrpy/config.json
+spotrpy/__pycache__
