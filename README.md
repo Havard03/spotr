@@ -55,7 +55,7 @@ Due to registration on pyPI being temporarily disabled, you currently have to do
 5. Run any spotr command
    - If command is not recognized, you might have to add wherever python stores packages to path, this can be different depending on OS.
        - <strong>Linux</strong> - on linux add "~/.local/bin" to your $PATH, this can be done by adding the following line to your .rc file (export PATH="$HOME/.local/bin:$PATH")
-       - <strong>MacOs</strong> - on mac i presonally fixed it by adding this to my .zshrc file (export PATH="$HOME/Library/Python/3.11/bin:$PATH") Here you have to change the python verion number accordingly
+       - <strong>MacOs</strong> - on mac i personally fixed it by adding this to my .zshrc file (export PATH="$HOME/Library/Python/3.11/bin:$PATH") Here you have to change the python verion number accordingly
 
 7. You will be prompted to create config.json and paste in client and secret id from spotify app
 
