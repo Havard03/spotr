@@ -44,16 +44,21 @@ Due to registration on pyPI being temporarily disabled, you currently have to do
 1. Clone repo to your computer and cd into folder
 
 2. Build files "python3 setup.py sdist bdist_wheel"
+   - On this step you might need to install build tools "pip3 install wheel setuptools"
 
-3. Install package "pip3 install ." (if you wish to later uninstall "pip3 uninstall spotrpy")
+3. Install package "pip3 install ."
+   - If you wish to later uninstall "pip3 uninstall spotrpy"
 
-4. Register an app in spotify for developers "https://developer.spotify.com/dashboard/applications" (also set callback URI to "https://www.google.com/")
+4. Register an app in spotify for developers "https://developer.spotify.com/dashboard/applications"
+   - Also set callback URI to "https://www.google.com/"
 
 5. Run any spotr command
+   - If command is not recognized, you might have to add wherever pythons stores packages to path, this can be different depending on OS.
+       - <strong>Linux</strong> on linux add "~/.local/bin" to your $PATH, this can be done by adding the following line to your .rc file (export PATH="$HOME/.local/bin:$PATH")
 
-6. You will be prompted to create config.json and paste in client and secret id from spotify app
+7. You will be prompted to create config.json and paste in client and secret id from spotify app
 
-7. After these steps everything should work and you can enjoy spotr
+8. After these steps everything should work and you can enjoy spotr
 
 </p>
 
@@ -87,7 +92,7 @@ volume      - Ajust volume <br>
 web         - Open currently playing track in a broswer <br>
 
 <h1 align="center" style="border-bottom: none">Debug mode</h1>
-<p align="center">Simply change the debug variable in .env file to enable debug mode (DEBUG="True")</p>
+<p align="center">Simply change the debug variable in config.json file to enable debug mode (DEBUG="True")</p>
 
 <img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/227784156-e1b56954-446b-4c13-9222-f82c4c71f5ce.gif">
 
