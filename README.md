@@ -62,29 +62,29 @@ Due to registration on pyPI being temporarily disabled, you currently have to do
 <img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/228016178-f64c5866-4f84-4246-8c1f-97569baaf802.gif">
 
 
-ascii       - Ascii image for current track
-authorise   - Authenticate with Spotify API
-config      - Modify config values in the terminal
-current     - Display information about the current track
-next        - Play next track
-playback    - Set playback state
-playlist    - Choose a playlist
-playlistadd - Add currently playing track to playlist
-previous    - Play previous track
-qsearch     - Quicksearch for tracks
-queue       - Get Queue
-recent      - Get recently played tracks
-recommend   - Play random / recommended tracks based on recent tracks
-refresh     - Refresh API key
-replay      - Replay/Restart currently playing song
-search      - Search for anything on spotify, Types - track, playlist, album
-seek        - Seek posistion for track in seconds
-shuffle     - Toggle shuffle, on / off
-start       - Start/Resume playing
-stop        - Stop/Pause playing
-vol         - Ajust volume
-volume      - Ajust volume
-web         - Open currently playing track in a broswer
+ascii       - Ascii image for current track <br>
+authorise   - Authenticate with Spotify API <br>
+config      - Modify config values in the terminal <br>
+current     - Display information about the current track <br>
+next        - Play next track <br>
+playback    - Set playback state <br>
+playlist    - Choose a playlist <br>
+playlistadd - Add currently playing track to playlist <br>
+previous    - Play previous track <br>
+qsearch     - Quicksearch for tracks <br>
+queue       - Get Queue <br>
+recent      - Get recently played tracks <br>
+recommend   - Play random / recommended tracks based on recent tracks <br>
+refresh     - Refresh API key <br>
+replay      - Replay/Restart currently playing song <br>
+search      - Search for anything on spotify, Types - track, playlist, album <br>
+seek        - Seek posistion for track in seconds <br>
+shuffle     - Toggle shuffle, on / off <br>
+start       - Start/Resume playing <br>
+stop        - Stop/Pause playing <br>
+vol         - Ajust volume <br>
+volume      - Ajust volume <br>
+web         - Open currently playing track in a broswer <br>
 
 <h1 align="center" style="border-bottom: none">Debug mode</h1>
 <p align="center">Simply change the debug variable in .env file to enable debug mode (DEBUG="True")</p>
