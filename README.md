@@ -36,39 +36,24 @@ Or set ASCII variable to True in config.json to replace spotify logo with ascii 
 
 <h1 align="center" style="border-bottom: none">Installation</h1>
 
-<h3>Script</h3>
-<p>
-
-1. Got to <a href="https://developer.spotify.com/dashboard/">Spotify dashboard</a> and register an app
-
-2. In options, set Redirect URIs to "https://www.google.com/"
-
-3. Clone repo, cd into folder, and run install script (python3 install.py)
-
-4. Follow instructions in script (paste in client-id and client-secret from spotify application when prompted)
-
-5. Run spotr in terminal and enjoy
-
-</p>
-
 <h3>Manual</h3>
 </p>
 
+Due to registration on pypi being temporarily disabled,you currently have to do a bit more manual work until it opens again
+
 1. Clone repo to your computer and cd into folder
 
-2. Make .spotr file executable "chmod u+x spotr"
+2. Build files "python3 setup.py sdist bdist_wheel"
 
-3. Register an app in spotify for developers "https://developer.spotify.com/dashboard/applications" (also set callback URI to "https://www.google.com/")
+3. Install package "pip3 install ." (if you wish to later uninstall "pip3 uninstall spotrpy")
 
-4. Install project requirements: pip3 install -r requirements.txt
+4. Register an app in spotify for developers "https://developer.spotify.com/dashboard/applications" (also set callback URI to "https://www.google.com/")
 
-5. Run "./spotr authorise" command in terminal and enter keys from the registered spotify app (You will be propted to create "config.json file")
+5. Run any spotr command
 
-6. Follow the steps and check that all relevant data was written to config.json file
+6. You will be prompted to create config.json and paste in client and secret id from spotify app
 
-7. Add current folder to PATH so the spotr file is excecutable everywhere (PATH=$PATH:/path/to/file)
-
-9. Run spotr in terminal and enjoy
+7. After these steps everything should work and you can enjoy spotr
 
 </p>
 
@@ -76,34 +61,30 @@ Or set ASCII variable to True in config.json to replace spotify logo with ascii 
 
 <img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/228016178-f64c5866-4f84-4246-8c1f-97569baaf802.gif">
 
-<h2>Main commands</h2>
 
-<h3>Single argument</h3>
-Current     - Displays info for the currently playing song <br> 
-Web         - Open currently playing song in a browser <br>
-Queue       - Get a list over song in your current queue <br>
-Next        - Play next song <br>
-Previous    - Play previous song <br>
-Start       - Start playing <br>
-Stop        - Stop / Pause playing <br>
-Replay      - Replay / Restart currently playing song <br>
-Recent      - Get a list of your recently played songs <br>
-Volume      - Set volume in precentage <br>
-Shuffle     - Toggle shuffle on or off <br>
-Seek        - Seek track posistion in seconds <br>
-Playlist    - Start playing one of your playlists <br>
-Playlistadd - Add currently playing song to one of your playlists <br>
-Playback    - Set playback state <br>
-Suprise     - Play recommended song based on recently played tracks<br>
-Ascii       - Display ascii image for current track, increase size width using second argument (default 100)
-
-<h3>Requires second argument</h3>
-Search      - Search for a song on spotify <br>
-Album       - Search for albums on spotify <br>
-
-<h2>Other</h2>
-Refresh     - Manually refresh spotify api token <br>
-Authorise   - Manually start authorisation processs <br>
+ascii       - Ascii image for current track
+authorise   - Authenticate with Spotify API
+config      - Modify config values in the terminal
+current     - Display information about the current track
+next        - Play next track
+playback    - Set playback state
+playlist    - Choose a playlist
+playlistadd - Add currently playing track to playlist
+previous    - Play previous track
+qsearch     - Quicksearch for tracks
+queue       - Get Queue
+recent      - Get recently played tracks
+recommend   - Play random / recommended tracks based on recent tracks
+refresh     - Refresh API key
+replay      - Replay/Restart currently playing song
+search      - Search for anything on spotify, Types - track, playlist, album
+seek        - Seek posistion for track in seconds
+shuffle     - Toggle shuffle, on / off
+start       - Start/Resume playing
+stop        - Stop/Pause playing
+vol         - Ajust volume
+volume      - Ajust volume
+web         - Open currently playing track in a broswer
 
 <h1 align="center" style="border-bottom: none">Debug mode</h1>
 <p align="center">Simply change the debug variable in .env file to enable debug mode (DEBUG="True")</p>
