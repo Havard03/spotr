@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """ Spotr """
 
 import logging
@@ -7,10 +6,12 @@ import sys
 import json
 from rich.console import Console
 from rich.logging import RichHandler
-from Router import Router
+from .Router import Router
+
 
 class Spotr:
     """Spotr"""
+
     def __init__(self, router, config):
         self.router = router
         self.console = Console()
@@ -53,7 +54,9 @@ class Spotr:
                             else self.log.error(message)
                         )
                     except TypeError:
-                        message = f"[bold red]Command needs input argument(s) - {args[0]}"
+                        message = (
+                            f"[bold red]Command needs input argument(s) - {args[0]}"
+                        )
                         self.log = (
                             self.log.exception(message)
                             if eval(self.config["DEBUG"])
@@ -81,12 +84,23 @@ class Spotr:
             else:
                 message = f"[bold red]Command in ignore list - {args[1]}"
                 self.log = (
-                    self.log.exception(message) if eval(self.config["DEBUG"]) else self.log.error(message)
+                    self.log.exception(message)
+                    if eval(self.config["DEBUG"])
+                    else self.log.error(message)
                 )
 
-if __name__ == "__main__":
-    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json"), "r", encoding="utf-8") as f:
-        config = json.load(f)
+def main():
+    """main"""
     router = Router()
+    with open(
+        os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json"),
+        "r",
+        encoding="utf-8",
+    ) as f:
+        config = json.load(f)
     spotr = Spotr(router, config)
     spotr.run(sys.argv[1:])
+
+
+if __name__ == "__main__":
+    main()

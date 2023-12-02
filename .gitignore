@@ -1,4 +1,11 @@
-__pycache__/
-.env
-config.json
-key.txt
+.tags
+*.egg-info
+build/*
+dist/*
+spotr
+*.pyc
+.tox
+.cache
+.idea
+spotr_py/config.json
+spotr_py/__pycache__

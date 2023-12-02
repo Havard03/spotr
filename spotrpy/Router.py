@@ -1,7 +1,6 @@
 """ Router Class """
 
 import re
-import os
 import time
 import webbrowser
 import logging
@@ -13,10 +12,10 @@ from rich.console import Console
 from yarl import URL
 from tqdm import tqdm
 
-from ASCII import ASCII
-from API import API
-from Helpers import Helpers
-from Configuration import Configuration
+from .ASCII import ASCII
+from .API import API
+from .Helpers import Helpers
+from .Configuration import Configuration
 
 log = logging.getLogger()
 console = Console()
