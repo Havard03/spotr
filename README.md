@@ -39,7 +39,7 @@ Or set ASCII variable to True in config.json to replace spotify logo with ascii 
 <h3>Manual</h3>
 </p>
 
-Due to registration on pypi being temporarily disabled,you currently have to do a bit more manual work until it opens again
+Due to registration on pyPI being temporarily disabled, you currently have to do a bit more manual work until it opens again
 
 1. Clone repo to your computer and cd into folder
 
