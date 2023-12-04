@@ -36,6 +36,27 @@ Or set ASCII variable to True in config.json to replace spotify logo with ascii 
 
 <h1 align="center" style="border-bottom: none">Installation</h1>
 
+<h3>Windows</h3>
+<p>
+
+1. Go to Releases and download the newest version of the installer.
+
+2. Follow the instructions to install.
+
+3. Go to <a href="https://developer.spotify.com/dashboard/">Spotify dashboard</a> and register an app.
+
+4. In options, set Redirect URIs to "https://www.google.com/".
+
+5. Past in client-id and client-secret in the designated fields. Continue the installation.
+
+6. Go to <a href="https://genius.com/api-clients/new">Genius dashboard</a> and register an app, set Redirect URIs to "https://www.google.com/".
+
+7. Add the path to system environment variables and run spotr in the terminal and enjoy.
+
+
+</p>
+
+
 <h3>Windows<h3>
 <p>
 
