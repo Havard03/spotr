@@ -53,6 +53,7 @@ Or set ASCII variable to True in config.json to replace spotify logo with ascii 
 
 7. Add the path to system environment variables and run spotr in the terminal and enjoy.
 
+</p>
 <h3>Script</h3>
 <p>
 
