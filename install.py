@@ -1,20 +1,19 @@
-""" Install script for spotr """
-
+# Importing necessary libraries
 import os
 import subprocess
 import json
 import sys
 import stat
 
-# Get current path
+# Retrieve the current directory path where the script is running
 PATH = os.path.dirname(os.path.realpath(__file__))
 
-# check if .env and key.txt exists and creates them if not
+# Check if the 'config.json' file exists in the current path, create it if not
 print("Creating config.json")
 if not os.path.exists(os.path.join(PATH + ".env")):
     open(os.path.join(PATH, "config.json"), "w", encoding="utf-8").close()
 
-
+# Define the default configuration settings for the application
 CONFIG = {
     "path": PATH,
     "refresh_token": "",
@@ -80,8 +79,9 @@ CONFIG = {
         "__subclasshook__",
         "__weakref__",
         "authorise_spotify",
-        "authorise_genius"
-    ], }
+        "authorise_genius",
+    ],
+}
+# Write the defined configuration to 'config.json' file
 with open(os.path.join(PATH, "config.json"), "w", encoding="utf-8") as file:
     json.dump(CONFIG, file, indent=4)
-

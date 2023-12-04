@@ -1,5 +1,4 @@
-""" Configuration class """
-
+# Importing necessary modules
 import os
 import sys
 import json
@@ -7,13 +6,15 @@ import logging
 import textwrap
 import questionary
 
+# Setting up logging
 log = logging.getLogger()
 
 
 class Configuration:
-    """Configuration class"""
+    """Configuration class responsible for handling and validating configuration settings."""
 
     def __init__(self):
+        # Try to read and load configuration from the 'config.json' file
         try:
             with open(
                 os.path.join(
@@ -25,6 +26,7 @@ class Configuration:
                 self.CONFIG = json.load(file)
                 self.validate_config()
         except FileNotFoundError:
+            # Handling the case when 'config.json' file is not found
             log.critical("Config file not found!")
             create_file = str(
                 input(
@@ -32,6 +34,7 @@ class Configuration:
                 )
             )
             if create_file.lower() == "y":
+                # Creating a default configuration if the user agrees
                 self.CONFIG = {
                     "path": os.path.dirname(os.path.realpath(__file__)),
                     "refresh_token": "",
@@ -98,11 +101,12 @@ class Configuration:
                         "__weakref__",
                         "authorise_spotify",
                         "authorise_genius",
-                    ], }
+                    ],
+                }
+                # Writing the default configuration to 'config.json'
                 with open(
                     os.path.join(
-                        os.path.dirname(os.path.realpath(
-                            __file__)), "config.json"
+                        os.path.dirname(os.path.realpath(__file__)), "config.json"
                     ),
                     "w",
                     encoding="utf-8",
@@ -110,6 +114,8 @@ class Configuration:
                     json.dump(self.CONFIG, file, indent=4)
                 print("Starting spotify authentication process...")
                 self.authorise()
+
+        # ASCII logo configuration
         self.CONFIG["ASCII_LOGO"] = textwrap.dedent(
             """
             ⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣶⣶⣶⣶⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀
@@ -135,12 +141,12 @@ class Configuration:
         )
 
     def config(self):
-        """Modify config values in the terminal"""
-
+        """Allows the user to modify configuration values in the terminal."""
         while True:
             configurations = [
                 f"{config} - [{self.CONFIG[config]}]" for config in self.CONFIG
             ]
+            # Using questionary library to display an interactive prompt
             config = questionary.select(
                 "Select configuration | Ctrl + C to exit",
                 configurations,
@@ -150,6 +156,7 @@ class Configuration:
                 use_jk_keys=False,
             ).ask()
 
+            # Logic to modify the chosen configuration parameter
             if config is not None:
                 config = config.split(" - ")[0]
                 new_config = questionary.text(
@@ -162,14 +169,14 @@ class Configuration:
                 sys.exit()
 
     def write_config(self):
-        """Write json data"""
+        """Writes the current configuration to 'config.json' file."""
         with open(
             os.path.join(self.CONFIG["path"], "config.json"), "w", encoding="utf-8"
         ) as file:
             json.dump(self.CONFIG, file, indent=4)
 
     def validate_config(self):
-        """Validate config.json"""
+        """Validates the keys present in 'config.json'."""
         required_keys = [
             "path",
             "refresh_token",
@@ -193,12 +200,12 @@ class Configuration:
         config_keys = set(self.CONFIG.keys())
         if not set(required_keys).issubset(config_keys):
             missing_keys = set(required_keys) - config_keys
+            # Logging error if any key is missing
             log.error(
                 "The following keys are missing in the config.json: %s",
                 ", ".join(missing_keys),
             )
-            log.info(
-                "If you have an old config file, delete it and run any command")
+            log.info("If you have an old config file, delete it and run any command")
             sys.exit(1)
         else:
             return
