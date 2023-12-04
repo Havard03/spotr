@@ -36,8 +36,7 @@ Or set ASCII variable to True in config.json to replace spotify logo with ascii 
 
 <h1 align="center" style="border-bottom: none">Installation</h1>
 
-
-<h3>Windows</h3>
+<h3>Windows<h3>
 <p>
 
 1. Go to Releases and download the newest version of the installer.
@@ -54,6 +53,20 @@ Or set ASCII variable to True in config.json to replace spotify logo with ascii 
 
 7. Add the path to system environment variables and run spotr in the terminal and enjoy.
 
+
+</p>
+<h3>Script</h3>
+<p>
+
+1. Go to <a href="https://developer.spotify.com/dashboard/">Spotify dashboard</a> and register an app.
+
+2. In options, set Redirect URIs to "https://www.google.com/".
+
+3. Clone repo, cd into folder, and run install script (python3 install.py).
+
+4. Follow instructions in script (paste in client-id and client-secret from spotify application when prompted).
+
+5. Run spotr in terminal and enjoy.
 
 </p>
 
