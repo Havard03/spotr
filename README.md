@@ -55,22 +55,6 @@ Or set ASCII variable to True in config.json to replace spotify logo with ascii 
 
 
 </p>
-<h3>Script</h3>
-<p>
-
-1. Go to <a href="https://developer.spotify.com/dashboard/">Spotify dashboard</a> and register an app.
-
-2. In options, set Redirect URIs to "https://www.google.com/".
-
-3. Clone repo, cd into folder, and run install script (python3 install.py).
-
-4. Follow instructions in script (paste in client-id and client-secret from spotify application when prompted).
-
-5. Run spotr in terminal and enjoy.
-
-</p>
-
-
 <h3>Manual</h3>
 </p>
 
