@@ -36,30 +36,25 @@ Or set ASCII variable to True in config.json to replace spotify logo with ascii 
 
 <h1 align="center" style="border-bottom: none">Installation</h1>
 
-<h3>Manual</h3>
-</p>
+```
+$ pip install spotrpy
+```
+Or clone the repo and install locally
+```
+$ pip install -e .
+```
 
-Due to registration on pyPI being temporarily disabled, you currently have to do a bit more manual work until it opens again
-
-1. Clone repo to your computer and cd into folder
-
-2. Build files "python3 setup.py sdist bdist_wheel"
-   - On this step you might need to install build tools "pip3 install wheel setuptools"
-
-3. Install package "pip3 install ."
-   - If you wish to later uninstall "pip3 uninstall spotrpy"
-
-4. Register an app in spotify for developers "https://developer.spotify.com/dashboard/applications"
+2. Register an app in spotify for developers "https://developer.spotify.com/dashboard/applications"
    - Also set callback URI to "https://www.google.com/"
 
-5. Run any spotr command
+3. Run any spotr command
    - If command is not recognized, you might have to add wherever python stores packages to path, this can be different depending on OS.
        - <strong>Linux</strong> - on linux add "~/.local/bin" to your $PATH, this can be done by adding the following line to your .rc file (export PATH="$HOME/.local/bin:$PATH")
        - <strong>MacOs</strong> - on mac i personally fixed it by adding this to my .zshrc file (export PATH="$HOME/Library/Python/3.11/bin:$PATH") Here you have to change the python verion number accordingly
 
-7. You will be prompted to create config.json and paste in client and secret id from spotify app
+4. You will be prompted to create config.json and paste in client and secret id from spotify app
 
-8. After these steps everything should work and you can enjoy spotr
+5. After these steps everything should work and you can enjoy spotr
 
 </p>
 
