@@ -23,7 +23,6 @@ setup(
         'requests==2.28.1',
         'rich==13.6.0',
         'tqdm==4.66.1',
-        'yarl==1.9.2',
     ],
     entry_points={
         'console_scripts': [
