@@ -20,19 +20,7 @@ A very simple CLI for controlling your spotify on the fly in the terminal.
 Made in python for simplicity
 </p>
 
-<img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/228016062-60718528-212a-49c9-ac3d-c81bb43d3278.gif">
-
-<h1 align="center" style="border-bottom: none">NEWS</h1>
-<p align="center">
-It is now possible to bring the pictures into the terminal with image to ascii convertion!
-<br>
-Use "ascii" command to show image
-<br>
-Or set ASCII variable to True in config.json to replace spotify logo with ascii image for "current" command
-</p>
-
-<img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/7c36407d-e335-468b-ad44-59cc89f30b2e">
-
+<img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/1ab68044-f134-4a78-956a-7ac5641dae1f">
 
 <h1 align="center" style="border-bottom: none">Installation</h1>
 
