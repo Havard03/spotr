@@ -15,9 +15,7 @@
 </p>
 
 <p align="center">
-A very simple CLI for controlling your spotify on the fly in the terminal. 
-<br>
-Made in python for simplicity
+A very simple CLI for controlling your spotify on the fly in the terminal. Made in python for simplicity
 </p>
 
 <img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/1ab68044-f134-4a78-956a-7ac5641dae1f">
