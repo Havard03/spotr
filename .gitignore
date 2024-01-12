@@ -1,11 +1,6 @@
-.tags
 *.egg-info
 build/*
 dist/*
 spotr
-*.pyc
-.tox
-.cache
-.idea
 spotrpy/config.json
 spotrpy/__pycache__

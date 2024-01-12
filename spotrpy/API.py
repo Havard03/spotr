@@ -6,10 +6,10 @@ import sys
 import time
 import webbrowser
 import requests
-from yarl import URL
+from urllib.parse import urljoin
 
 log = logging.getLogger()
-ACCOUNT_URL = URL.build(scheme="https", host="accounts.spotify.com")
+ACCOUNT_URL = "https://accounts.spotify.com"
 
 class API:
     """API class for sending all requests"""
@@ -46,7 +46,7 @@ class API:
 
     def refresh_key(self):
         """Refresh API key"""
-        url = ACCOUNT_URL / "api" / "token"
+        url = urljoin(ACCOUNT_URL, "api/token")
         
         response = requests.post(
             url,
@@ -72,8 +72,8 @@ class API:
 
     def authorise(self):
         """Authenticate with Spotify API"""
-        auth_url = ACCOUNT_URL / "authorize"
-        token_url = ACCOUNT_URL / "api" / "token"
+        auth_url = urljoin(ACCOUNT_URL, "authorize")
+        token_url = urljoin(ACCOUNT_URL, "api/token")
 
         client_id = str(input("Spotify-App Client id: "))
         client_secret = str(input("Spotify-App Client secret: "))
