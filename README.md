@@ -46,9 +46,6 @@ $ pip install -e .
 
 <h1 align="center" style="border-bottom: none">Built-in Commands</h1>
 
-<img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/228016178-f64c5866-4f84-4246-8c1f-97569baaf802.gif">
-
-
 ascii       - Ascii image for current track <br>
 authorise   - Authenticate with Spotify API <br>
 config      - Modify config values in the terminal <br>
