@@ -1,18 +1,23 @@
 """API class"""
 
 import base64
-import logging
 import sys
 import time
 import webbrowser
 import requests
 from urllib.parse import urljoin
 
-log = logging.getLogger()
-ACCOUNT_URL = "https://accounts.spotify.com"
-
 class API:
     """API class for sending all requests"""
+
+    def __initAPI__(self):
+        self.SPOTIFY_LIMIT = 50
+        self.QUSTIONARY_LIMIT = 36
+        self.API_VERSION = "v1"
+        self.API_BASE = "api.spotify.com"
+        self.ACCOUNT_URL = "https://accounts.spotify.com" 
+        self.API_PLAYER = urljoin("https://api.spotify.com", f"{self.API_VERSION}/me/player/")
+        self.API_BASE_VERSION = urljoin("https://api.spotify.com", f"{self.API_VERSION}/")
 
     def request(
         self, 
@@ -33,8 +38,8 @@ class API:
             response = requests.request(method, url, headers=headers, json=json, timeout=10)
 
         if not response.ok:
-            log.warning("[bold red]request error - status-code: %d", response.status_code)
-            log.info(response.json())
+            self.log.warning("[bold red]request error - status-code: %d", response.status_code)
+            self.log.info(response.json())
             sys.exit()
 
         try:
@@ -43,10 +48,14 @@ class API:
             return None
 
         return data
+    
+    def play(self, json=None):
+        """Play song or collection of songs"""
+        self.request("PUT", str(urljoin(self.API_PLAYER, "play")), json=json)
 
     def refresh_key(self):
         """Refresh API key"""
-        url = urljoin(ACCOUNT_URL, "api/token")
+        url = urljoin(self.ACCOUNT_URL, "api/token")
         
         response = requests.post(
             url,
@@ -58,11 +67,11 @@ class API:
             timeout=10,
         )
         if not response.ok:
-            log.warning(
+            self.log.warning(
                 "[bold red]request error - status-code: %d",
                 response.status_code,
             )
-            log.info(
+            self.log.info(
                 "[bold blue]Most likely something wrong with base_64 or refresh_token, try running 'spotr authorise'"
             )
             sys.exit()
@@ -72,8 +81,8 @@ class API:
 
     def authorise(self):
         """Authenticate with Spotify API"""
-        auth_url = urljoin(ACCOUNT_URL, "authorize")
-        token_url = urljoin(ACCOUNT_URL, "api/token")
+        auth_url = urljoin(self.ACCOUNT_URL, "authorize")
+        token_url = urljoin(self.ACCOUNT_URL, "api/token")
 
         client_id = str(input("Spotify-App Client id: "))
         client_secret = str(input("Spotify-App Client secret: "))
@@ -115,7 +124,7 @@ class API:
         )
 
         if not access_token_request.ok:
-            log.warning("Request error: %d", access_token_request.status_code)
+            self.log.warning("Request error: %d", access_token_request.status_code)
             sys.exit()
 
         access_token_response_data = access_token_request.json()
