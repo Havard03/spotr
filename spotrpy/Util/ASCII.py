@@ -1,11 +1,8 @@
 """ ASCII """
 
 from io import BytesIO
-import logging
 from PIL import Image
 import requests
-
-log = logging.getLogger()
 
 class ASCII:
     """ASCII class"""

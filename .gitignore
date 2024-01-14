@@ -2,5 +2,7 @@
 build/*
 dist/*
 spotr
-spotrpy/config.json
 spotrpy/__pycache__
+spotrpy/commands/__pycache__
+spotrpy/Util/config.json
+spotrpy/Util/__pycache__
