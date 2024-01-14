@@ -70,17 +70,11 @@ vol         - Ajust volume <br>
 volume      - Ajust volume <br>
 web         - Open currently playing track in a broswer <br>
 
-<h1 align="center" style="border-bottom: none">Debug mode</h1>
-<p align="center">Simply change the debug variable in config.json file to enable debug mode (DEBUG="True")</p>
-
-<img align="center" width="100%" src="https://user-images.githubusercontent.com/58250866/227784156-e1b56954-446b-4c13-9222-f82c4c71f5ce.gif">
-
 <h1 align="center" style="border-bottom: none">Modifications</h1>
 <p>
 
-You can easily create your own commands and scripts by adding a function in router.py
-
-As soon as the function is created and saved you can run it on the terminal with (spotr function-name)
+You can easily create your own commands by adding a file in spotrpy/commands using the example.py template.
+As soon as the file is created and saved you can run it on the terminal with (spotr <command>)
 
 <h4>I recommend going to spotifys <a href="https://developer.spotify.com/console/">API documentation</a> to get a grasp of what is possible</h4>
 
