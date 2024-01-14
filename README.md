@@ -74,7 +74,7 @@ web         - Open currently playing track in a broswer <br>
 <p>
 
 You can easily create your own commands by adding a file in spotrpy/commands using the example.py template.
-As soon as the file is created and saved you can run it on the terminal with (spotr <command>)
+As soon as the file is created and saved you can run it on the terminal with (spotr command)
 
 <h4>I recommend going to spotifys <a href="https://developer.spotify.com/console/">API documentation</a> to get a grasp of what is possible</h4>
 
