@@ -5,4 +5,5 @@ spotr
 spotrpy/__pycache__
 spotrpy/commands/__pycache__
 spotrpy/Util/config.json
+spotrpy/config.json
 spotrpy/Util/__pycache__
