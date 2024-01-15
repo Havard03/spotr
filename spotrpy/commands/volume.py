@@ -39,7 +39,7 @@ class Volume():
         self.request(
             "PUT",
             str(
-                f"{urljoin(self.API_PLAYER, "volume")}?{urlencode({"volume_percent": str(volume).replace("%", "")})}"
+                f"{urljoin(self.API_PLAYER, 'volume')}?{urlencode({'volume_percent': str(volume).replace('%', '')})}"
             ),
         )
 

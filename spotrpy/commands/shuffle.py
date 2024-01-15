@@ -31,4 +31,4 @@ class Shuffle():
             use_shortcuts=True,
         ).ask()
         
-        self.request("PUT", str(f"{urljoin(self.API_PLAYER, "shuffle")}?{urlencode({"state": state})}"))
+        self.request("PUT", str(f"{urljoin(self.API_PLAYER, 'shuffle')}?{urlencode({'state': state})}"))

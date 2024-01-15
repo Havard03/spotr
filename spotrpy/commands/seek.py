@@ -25,6 +25,6 @@ class Seek():
         """Seek posistion for track in seconds"""
         self.request(
             "PUT",
-            str(f"{urljoin(self.API_PLAYER, "seek")}?{urlencode({"position_ms": int(progress) * 1000})}")
+            str(f"{urljoin(self.API_PLAYER, 'seek')}?{urlencode({'position_ms': int(progress) * 1000})}")
         )
 

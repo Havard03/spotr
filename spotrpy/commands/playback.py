@@ -34,6 +34,6 @@ class Playback():
         if state is None:
             return
         
-        self.request("PUT", str(f"{urljoin(self.API_PLAYER, "repeat")}?{urlencode({"state": state})}"))
+        self.request("PUT", str(f"{urljoin(self.API_PLAYER, 'repeat')}?{urlencode({'state': state})}"))
 
 
