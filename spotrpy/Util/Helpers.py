@@ -63,7 +63,7 @@ class Helpers:
     def parse_functions(self):
         """Parse and display available funcions / commands"""
         if eval(self.CONFIG["ANSI_COLORS"]):
-            self.console.print(f"[bold green]{textwrap.indent(self.CONFIG["ASCII_LOGO"], "  ")}")
+            self.console.print(f"[bold green]{textwrap.indent(self.CONFIG['ASCII_LOGO'], '  ')}")
             self.console.print("  [bold red]Avaiable commands[/bold red]")
             self.console.print("  [bold green]---------------------------------------")
         else:
@@ -78,7 +78,7 @@ class Helpers:
         for i in range(0, len(commands), 5):
             group = commands[i:i+5]
             if eval(self.CONFIG["ANSI_COLORS"]):
-                self.console.print(f"  [bold white]{", ".join(group)}")
+                self.console.print(f"  [bold white]{', '.join(group)}")
             else:
                 self.console.print(f"  {group}")
         print()
