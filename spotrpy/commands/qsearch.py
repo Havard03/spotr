@@ -28,7 +28,7 @@ class Qsearch():
         data = self.request(
             "GET",
             str(
-                f"{urljoin(self.API_BASE_VERSION, "search")}?{urlencode({"q": " ".join(query), "type": "track", "limit": 1})}"
+                f"{urljoin(self.API_BASE_VERSION, 'search')}?{urlencode({'q': ' '.join(query), 'type': 'track', 'limit': 1})}"
             ),
         )
 

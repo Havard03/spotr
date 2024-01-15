@@ -14,7 +14,7 @@ class Recommend():
         }
 
         # Data URL
-        self.URL = str(f"{urljoin(spotr.API_PLAYER, "recently-played")}?{urlencode({"limit": 5})}")
+        self.URL = str(f"{urljoin(spotr.API_PLAYER, 'recently-played')}?{urlencode({'limit': 5})}")
 
         # Arguments passed
         self.args = spotr.args
@@ -42,12 +42,12 @@ class Recommend():
         recommended = self.request(
             "GET",
             str(
-                f"{urljoin(self.API_BASE_VERSION, "recommendations")}?{urlencode(
+                f"{urljoin(self.API_BASE_VERSION, 'recommendations')}?{urlencode(
                     {
-                        "seed_arists": ",".join(seed_arists),
-                        "seed_generes": ",".join(seed_generes),
-                        "seed_tracks": ",".join(seed_tracks),
-                        "limit": 5,
+                        'seed_arists': ','.join(seed_arists),
+                        'seed_generes': ','.join(seed_generes),
+                        'seed_tracks': ','.join(seed_tracks),
+                        'limit': 5,
                     }
                 )}"
             ),

@@ -15,7 +15,7 @@ class Recent():
         }
 
         # Data URL
-        self.URL = str(f"{urljoin(spotr.API_PLAYER, "recently-played")}?{urlencode({"limit" : spotr.QUSTIONARY_LIMIT})}")
+        self.URL = str(f"{urljoin(spotr.API_PLAYER, 'recently-played')}?{urlencode({'limit' : spotr.QUSTIONARY_LIMIT})}")
 
         # Arguments passed
         self.args = spotr.args

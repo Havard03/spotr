@@ -15,7 +15,7 @@ class Playlist():
         }
 
         # Data URL
-        self.URL = str(f"{urljoin(spotr.API_BASE_VERSION, "me/playlists")}?{urlencode({"limit": spotr.SPOTIFY_LIMIT})}")
+        self.URL = str(f"{urljoin(spotr.API_BASE_VERSION, 'me/playlists')}?{urlencode({'limit': spotr.SPOTIFY_LIMIT})}")
 
         # Arguments passed
         self.args = spotr.args

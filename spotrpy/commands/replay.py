@@ -14,7 +14,7 @@ class Replay():
         }
 
         # Data URL
-        self.URL = str(f"{urljoin(spotr.API_PLAYER, "seek")}?{urlencode({"position_ms": 0})}")
+        self.URL = str(f"{urljoin(spotr.API_PLAYER, 'seek')}?{urlencode({'position_ms': 0})}")
 
         # Arguments passed
         self.args = spotr.args

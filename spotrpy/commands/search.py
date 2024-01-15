@@ -81,7 +81,7 @@ class Search():
         data = self.request(
             "GET",
             str(
-                f"{urljoin(self.API_BASE_VERSION, "search")}?{urlencode({"q": " ".join(query), "type": search_type, "limit": self.QUSTIONARY_LIMIT})}"
+                f"{urljoin(self.API_BASE_VERSION, 'search')}?{urlencode({'q': ' '.join(query), 'type': search_type, 'limit': self.QUSTIONARY_LIMIT})}"
             )
         )
 
