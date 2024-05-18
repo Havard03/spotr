@@ -1,29 +1,18 @@
-from urllib.parse import urljoin, urlencode
+from ..spotr import Spotr
+from urllib.parse import urljoin
 
-class Stop():
-    """ Stop class """
+class Stop(Spotr):
+    """ Stop """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Stop',
-            'description': 'Stop/Pause playing',
-            'arguments': [],
-            'min_args': 0,
-            'max_args': 0,
-        }
+    description = "Stop/Pause playing"
 
-        # Data URL
-        self.URL = str(urljoin(spotr.API_PLAYER, "pause"))
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Arguments passed
-        self.args = spotr.args
-
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
+    @staticmethod
+    def add_arguments(parser):
+        pass
 
     def execute(self):
-        """Stop/Pause playing"""
-        self.request("PUT", self.URL)
-
+        self.request("PUT", urljoin(self.API_PLAYER, "pause"))

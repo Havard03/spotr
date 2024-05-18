@@ -7,7 +7,7 @@ with open("README.md", "r", encoding = "utf-8") as fh:
 
 setup(
     name='spotrpy',
-    version='2.1',
+    version='3.0',
     packages=find_packages(),
     python_requires = ">=3.6",
     author = "Havard03",
@@ -26,13 +26,12 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'spotr=spotrpy.spotr:main',
+            'spotr=spotrpy.main:main',
         ],
     },
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
-        'Operating System :: POSIX',
-        'Operating System :: Unix',
+        'Operating System :: OS Independent',
     ],
 )

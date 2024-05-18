@@ -1,39 +1,35 @@
 import questionary
+
+from ..spotr import Spotr
 from urllib.parse import urljoin, urlencode
 
-class Playback():
-    """ Playback class """
+class Playback(Spotr):
+    """ Playback """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Playback',
-            'description': 'Set playback state',
-            'arguments': [],
-            'min_args': 0,
-            'max_args': 0,
-        }
+    description = "Set playback state"
 
-        # Arguments passed
-        self.args = spotr.args
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
-        self.API_PLAYER = spotr.API_PLAYER
+    @staticmethod
+    def add_arguments(parser):
+        parser.add_argument(
+            '-s', '--state', type=str, choices=["track", "context", "off"], help="playback state"
+        )
 
     def execute(self):
-        """Set playback state"""
-        state = questionary.select(
-            "Choose a play state",
-            choices=["track", "context", "off"],
-            erase_when_done=True,
-            use_shortcuts=True,
-        ).ask()
+        if not self.args.state:
+            state = questionary.select(
+                "Choose a play state",
+                choices=["track", "context", "off"],
+                erase_when_done=True,
+                use_shortcuts=True,
+            ).ask()
+        else:
+            state = self.args.state
 
         if state is None:
             return
         
         self.request("PUT", str(f"{urljoin(self.API_PLAYER, 'repeat')}?{urlencode({'state': state})}"))
-
-

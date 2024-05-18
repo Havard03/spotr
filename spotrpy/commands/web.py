@@ -1,34 +1,22 @@
 import webbrowser
-from urllib.parse import urljoin, urlencode
 
-class Web():
-    """ Web class """
+from ..spotr import Spotr
+from urllib.parse import urljoin
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Web',
-            'description': 'Open currently playing track in a broswer',
-            'arguments': [],
-            'min_args': 0,
-            'max_args': 0,
-        }
+class Web(Spotr):
+    """ Web """
 
-        # Data URL
-        self.URL = str(urljoin(spotr.API_PLAYER, "currently-playing"))
+    description = "Open currently playing track in a broswer"
 
-        # Arguments passed
-        self.args = spotr.args
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
+    @staticmethod
+    def add_arguments(parser):
+        pass
 
     def execute(self):
-        """Open currently playing track in a broswer"""
-        data = self.request("GET", self.URL)
-
-        if data is None:
-            return
-        
+        data = self.request("GET", urljoin(self.API_PLAYER, "currently-playing"))
+        if data is None: return
         webbrowser.open_new_tab(data["item"]["external_urls"]["spotify"])

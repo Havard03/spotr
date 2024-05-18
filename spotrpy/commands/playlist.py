@@ -1,34 +1,23 @@
 import questionary
+
+from ..spotr import Spotr
 from urllib.parse import urljoin, urlencode
 
-class Playlist():
-    """ Playlist class """
+class Playlist(Spotr):
+    """ Playlist """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Playlist',
-            'description': 'Choose a playlist',
-            'arguments': [],
-            'min_args': 0,
-            'max_args': 0,
-        }
+    description = "Start playing one of your playlists"
 
-        # Data URL
-        self.URL = str(f"{urljoin(spotr.API_BASE_VERSION, 'me/playlists')}?{urlencode({'limit': spotr.SPOTIFY_LIMIT})}")
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Arguments passed
-        self.args = spotr.args
-
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
-        self.parse_items = spotr.parse_items
-        self.play = spotr.play
+    @staticmethod
+    def add_arguments(parser):
+        pass
 
     def execute(self):
-        """Choose a playlist"""
-        data = self.request("GET", self.URL)
+        data = self.request("GET", f"{urljoin(self.API_BASE_VERSION, 'me/playlists')}?{urlencode({'limit': self.SPOTIFY_LIMIT})}")
 
         choices = self.parse_items(
             data,
@@ -49,5 +38,4 @@ class Playlist():
             return
 
         json = {"context_uri": selected, "offset": {"position": "0"}}
-        self.play(json=json)
-
+        self.request("PUT", str(urljoin(self.API_PLAYER, "play")), json=json)

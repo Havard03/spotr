@@ -1,30 +1,25 @@
 import questionary
+
+from ..spotr import Spotr
 from urllib.parse import urljoin, urlencode
 
-class Volume():
-    """ Volume class """
+class Volume(Spotr):
+    """ Volume """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Volume',
-            'description': 'Display ASCII art for the currently playing track.',
-            'arguments': ['Volume (in percentage)'],
-            'min_args': 0,
-            'max_args': 1,
-        }
+    description = "Ajust volume"
 
-        # Arguments passed
-        self.args = spotr.args
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
-        self.API_PLAYER = spotr.API_PLAYER
+    @staticmethod
+    def add_arguments(parser):
+        parser.add_argument(
+            '-p', '--percentage', type=str, help="Volume percentage"
+        )
 
-    def execute(self, volume=None):
-        """Ajust volume"""
-        if volume is None:
+    def execute(self):
+        if self.args.percentage is None:
             volume = questionary.select(
                 "Choose volume precentage",
                 choices=["25%", "50%", "75%", "100%"],
@@ -32,14 +27,11 @@ class Volume():
                 use_shortcuts=True,
             ).ask()
         else:
-            if int(volume) < 0:
-                volume = 0
-            elif int(volume) > 100:
-                volume = 100
+            volume = self.args.percentage
+
         self.request(
             "PUT",
             str(
                 f"{urljoin(self.API_PLAYER, 'volume')}?{urlencode({'volume_percent': str(volume).replace('%', '')})}"
             ),
         )
-

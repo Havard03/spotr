@@ -1,29 +1,18 @@
+from ..spotr import Spotr
 from urllib.parse import urljoin, urlencode
 
-class Replay():
-    """ Replay class """
+class Replay(Spotr):
+    """ Replay """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Replay',
-            'description': 'Replay/Restart currently playing track',
-            'arguments': [],
-            'min_args': 0,
-            'max_args': 0,
-        }
+    description = "Replay/Restart currently playing track"
 
-        # Data URL
-        self.URL = str(f"{urljoin(spotr.API_PLAYER, 'seek')}?{urlencode({'position_ms': 0})}")
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Arguments passed
-        self.args = spotr.args
-
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
+    @staticmethod
+    def add_arguments(parser):
+        pass
 
     def execute(self):
-        """Replay/Restart currently playing track"""
-        self.request("PUT", self.URL)
-
+        self.request("PUT", f"{urljoin(self.API_PLAYER, 'seek')}?{urlencode({'position_ms': 0})}")

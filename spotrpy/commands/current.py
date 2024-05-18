@@ -1,60 +1,48 @@
 import re
-import textwrap
 import time
+import textwrap
+
+from ..spotr import Spotr
 from urllib.parse import urljoin
 
-class Current():
-    """ Current class """
+class Current(Spotr):
+    """ Current """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Current',
-            'description': 'Display information about the currently playing track',
-            'arguments': [],
-            'min_args': 0,
-            'max_args': 0,
-        }
+    description = "Display information about the currently playing track"
 
-        # Data URL
-        self.URL = str(urljoin(spotr.API_PLAYER, "currently-playing"))
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Arguments passed
-        self.args = spotr.args
-
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
-        self.log = spotr.log
-        self.image_to_ascii = spotr.image_to_ascii
-        self.image_to_ascii_color = spotr.image_to_ascii_color
+    @staticmethod
+    def add_arguments(parser):
+        pass
 
     def execute(self):
-        """Display information about the currently playing track"""
-        data = self.request("GET", self.URL)
+        data = self.request("GET", urljoin(self.API_PLAYER, "currently-playing"))
 
         if data is None or data["item"] is None:
-            self.log.error("No data")
+            self.log.error(f'No data - {data}')
             return
 
         if data["currently_playing_type"] not in ("track"):
             self.log.error("Playing unsupported type - %s", data['currently_playing_type'])
             return
 
-        current_track = data["item"]
-        album_data = current_track["album"]
-        artist_names = ", ".join([artist["name"] for artist in current_track["artists"]])
-        track_duration_ms = current_track["duration_ms"]
-        track_duration_m, track_duration_s = divmod(track_duration_ms // 1000, 60)
-        progress_ms = data["progress_ms"]
-        progress_m, progress_s = divmod(progress_ms // 1000, 60)
-        track_id = current_track["id"]
-        track_name = current_track["name"]
-        track_type = album_data["album_type"]
-        album_name = album_data["name"]
-        track_release_date = album_data["release_date"]
-        track_url = current_track["external_urls"]["spotify"]
-        track_image = album_data["images"][0]["url"]
+        current_track                       = data["item"]
+        album_data                          = current_track["album"]
+        artist_names                        = ", ".join([artist["name"] for artist in current_track["artists"]])
+        track_duration_ms                   = current_track["duration_ms"]
+        track_duration_m, track_duration_s  = divmod(track_duration_ms // 1000, 60)
+        progress_ms                         = data["progress_ms"]
+        progress_m, progress_s              = divmod(progress_ms // 1000, 60)
+        track_id                            = current_track["id"]
+        track_name                          = current_track["name"]
+        track_type                          = album_data["album_type"]
+        album_name                          = album_data["name"]
+        track_release_date                  = album_data["release_date"]
+        track_url                           = current_track["external_urls"]["spotify"]
+        track_image                         = album_data["images"][0]["url"]
 
         color_start = "\x1b[{}m".format
         color_end = "\x1b[0m"
@@ -71,9 +59,9 @@ class Current():
         {color_start('37')}From{color_end}{color_start('32')}          -  {track_type} - {album_name}{color_end}
         {color_start('31')}Track details{color_end}
         {color_start('32')}------------------------------{color_end}
-        {color_start('37')}Id{color_end}{color_start('32')}  - {track_id}{color_end}
-        {color_start('37')}URL{color_end}{color_start('32')} - {track_url}{color_end}
-        {color_start('37')}Image{color_end}{color_start('32')} - {track_image}{color_end}
+        {color_start('37')}Id{color_end}{color_start('32')}     - {track_id}{color_end}
+        {color_start('37')}URL{color_end}{color_start('32')}    - {track_url}{color_end}
+        {color_start('37')}Image{color_end}{color_start('32')}  - {track_image}{color_end}
         """
         )
 

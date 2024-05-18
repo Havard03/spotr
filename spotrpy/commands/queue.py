@@ -1,34 +1,21 @@
+from ..spotr import Spotr
 from urllib.parse import urljoin, urlencode
 
-class Queue():
-    """ Queue class """
+class Queue(Spotr):
+    """ Queue """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Queue',
-            'description': 'Get songs in Queue',
-            'arguments': [],
-            'min_args': 0,
-            'max_args': 0,
-        }
+    description = "Display current queue"
 
-        # Data URL
-        self.URL = str(urljoin(spotr.API_PLAYER, "queue"))
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Arguments passed
-        self.args = spotr.args
-
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
-        self.console = spotr.console
+    @staticmethod
+    def add_arguments(parser):
+        pass
 
     def execute(self):
-        """Get songs in Queue"""
-        data = self.request("GET", self.URL)
+        data = self.request("GET", urljoin(self.API_PLAYER, "queue"))
 
         for track in data["queue"]:
             self.console.print(f"[bold green]{track['name']}")
-
-

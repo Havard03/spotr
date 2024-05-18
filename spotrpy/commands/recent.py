@@ -1,34 +1,23 @@
 import questionary
+
+from ..spotr import Spotr
 from urllib.parse import urljoin, urlencode
 
-class Recent():
-    """ Recent class """
+class Recent(Spotr):
+    """ Recent """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Recent',
-            'description': 'Get recently played tracks',
-            'arguments': [],
-            'min_args': 0,
-            'max_args': 0,
-        }
+    description = "Select one of recently played tracks"
 
-        # Data URL
-        self.URL = str(f"{urljoin(spotr.API_PLAYER, 'recently-played')}?{urlencode({'limit' : spotr.QUSTIONARY_LIMIT})}")
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Arguments passed
-        self.args = spotr.args
-
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
-        self.parse_items = spotr.parse_items
-        self.play = spotr.play
+    @staticmethod
+    def add_arguments(parser):
+        pass
 
     def execute(self):
-        """Get recently played tracks"""
-        data = self.request("GET", self.URL)
+        data = self.request("GET", f"{urljoin(self.API_PLAYER, 'recently-played')}?{urlencode({'limit' : self.QUSTIONARY_LIMIT})}")
 
         choices = self.parse_items(
             data,
@@ -50,7 +39,5 @@ class Recent():
         if selected is None:
             return
 
-        json_data = {"uris": [selected]}
-        self.play(json=json_data)
-
-
+        json = {"uris": [selected]}
+        self.request("PUT", str(urljoin(self.API_PLAYER, "play")), json=json)

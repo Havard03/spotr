@@ -4,12 +4,13 @@ from rich.console import Console
 from rich.logging import RichHandler
 
 class Logging:
+    """ Logging """
 
     def __initLogging__(self):
         self.log = logging.getLogger()
         self.console = Console()
 
-        if eval(self.CONFIG["DEBUG"]):
+        if self.args.debug:
             logging.basicConfig(
                 level="NOTSET",
                 format="%(message)s",
@@ -21,5 +22,5 @@ class Logging:
                 level="INFO",
                 datefmt="[%X]",
                 format="%(message)s",
-                handlers=[RichHandler(markup=True)],
+                handlers=[RichHandler(markup=True, rich_tracebacks=True)],
             )
