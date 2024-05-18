@@ -1,33 +1,27 @@
 import questionary
+
+from ..spotr import Spotr
 from urllib.parse import urljoin, urlencode
 
-class Search():
-    """ Search class """
+class Search(Spotr):
+    """ Search """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Search',
-            'description': 'Search for anything on spotify, Types - track, playlist, album',
-            'arguments': [['Query...'],['Type', 'Query...']],
-            'min_args': 1,
-            'max_args': 999,
-        }
+    description = "Search for anything on spotify, Types - track, playlist, album"
 
-        # Arguments passed
-        self.args = spotr.args
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
-        self.play = spotr.play
-        self.parse_items = spotr.parse_items
-        self.API_BASE_VERSION = spotr.API_BASE_VERSION
-        self.QUSTIONARY_LIMIT = spotr.QUSTIONARY_LIMIT
+    @staticmethod
+    def add_arguments(parser):
+        parser.add_argument(
+            'query', type=str, help="Search query", nargs='*'
+        )
+        parser.add_argument(
+            '-t', '--type', type=str, choices=["track", "playlist", "album"], help="Search type"
+        )
 
-
-    def execute(self, *query):
-        """Search for anything on spotify, Types - track, playlist, album"""
+    def execute(self):
         search_types = {
             "track": {
                 "accessor": ["tracks", "items"],
@@ -61,7 +55,7 @@ class Search():
             },
         }
 
-        if query[0] not in ["track", "playlist", "album"]:
+        if not self.args.type:
             available_types = ["track", "playlist", "album"]
             search_type = questionary.select(
                 "Select search type",
@@ -74,14 +68,12 @@ class Search():
             if search_type is None:
                 return
         else:
-            query = list(query)
-            search_type = query[0]
-            query.pop(0)
+            search_type = self.args.type
 
         data = self.request(
             "GET",
             str(
-                f"{urljoin(self.API_BASE_VERSION, 'search')}?{urlencode({'q': ' '.join(query), 'type': search_type, 'limit': self.QUSTIONARY_LIMIT})}"
+                f"{urljoin(self.API_BASE_VERSION, 'search')}?{urlencode({'q': ' '.join(self.args.query), 'type': search_type, 'limit': self.QUSTIONARY_LIMIT})}"
             )
         )
 
@@ -112,7 +104,5 @@ class Search():
         else:
             json[search_types[search_type]["json_value"]] = selected
 
-        self.play(json=json)
-
-
+        self.request("PUT", str(urljoin(self.API_PLAYER, "play")), json=json)
 

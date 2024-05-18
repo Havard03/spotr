@@ -1,34 +1,22 @@
+from ..spotr import Spotr
 from urllib.parse import urljoin, urlencode
 
-class Recommend():
-    """ Recommend class """
+class Recommend(Spotr):
+    """ Recommend """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Recommend',
-            'description': 'Play random / recommended tracks based on recent tracks',
-            'arguments': [],
-            'min_args': 0,
-            'max_args': 0,
-        }
+    description = "Play random / recommended tracks based on recent tracks"
 
-        # Data URL
-        self.URL = str(f"{urljoin(spotr.API_PLAYER, 'recently-played')}?{urlencode({'limit': 5})}")
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Arguments passed
-        self.args = spotr.args
-
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
-        self.play = spotr.play
-        self.API_BASE_VERSION = spotr.API_BASE_VERSION
+    @staticmethod
+    def add_arguments(parser):
+        pass
 
     def execute(self):
-        """Play random / recommended tracks based on recent tracks"""
         recent = self.request(
-            "GET", self.URL
+            "GET", f"{urljoin(self.API_PLAYER, 'recently-played')}?{urlencode({'limit': 5})}"
         )
 
         seed_arists = []
@@ -56,6 +44,4 @@ class Recommend():
         for track in recommended["tracks"]:
             results.append(track["uri"])
         json = {"uris": results, "offset": {"position": "0"}}
-
-        self.play(json=json)
-        self.current()
+        self.request("PUT", str(urljoin(self.API_PLAYER, "play")), json=json)

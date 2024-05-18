@@ -1,37 +1,29 @@
+from ..spotr import Spotr
 from urllib.parse import urljoin, urlencode
 
-class Qsearch():
-    """ Qsearch class """
+class Qsearch(Spotr):
+    """ Qsearch """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Qsearch (Quicksearch)',
-            'description': 'Quicksearch for tracks',
-            'arguments': ['Query...'],
-            'min_args': 1,
-            'max_args': 999,
-        }
+    description = "Quicksearch for tracks"
 
-        # Arguments passed
-        self.args = spotr.args
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
-        self.play = spotr.play
-        self.API_BASE_VERSION = spotr.API_BASE_VERSION
+    @staticmethod
+    def add_arguments(parser):
+        parser.add_argument(
+            'query', type=str, help="Search query", nargs='*'
+        )
 
-
-    def execute(self, *query):
-        """ Info """
+    def execute(self):
         data = self.request(
             "GET",
             str(
-                f"{urljoin(self.API_BASE_VERSION, 'search')}?{urlencode({'q': ' '.join(query), 'type': 'track', 'limit': 1})}"
+                f"{urljoin(self.API_BASE_VERSION, 'search')}?{urlencode({'q': ' '.join(self.args.query), 'type': 'track', 'limit': 1})}"
             ),
         )
-
         json_id = [data['tracks']['items'][0]['uri']]
         json = {"uris": json_id, "offset": {"position": "0"}}
-        self.play(json=json)
+
+        self.request("PUT", str(urljoin(self.API_PLAYER, "play")), json=json)

@@ -1,29 +1,18 @@
-from urllib.parse import urljoin, urlencode
+from ..spotr import Spotr
+from urllib.parse import urljoin
 
-class Next():
-    """ Next class """
+class Next(Spotr):
+    """ Next """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Next',
-            'description': 'Play next track',
-            'arguments': [],
-            'min_args': 0,
-            'max_args': 0,
-        }
+    description = "Play next track"
 
-        # Data URL
-        self.URL = str(urljoin(spotr.API_PLAYER, "next"))
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Arguments passed
-        self.args = spotr.args
-
-        # Unpack form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
+    @staticmethod
+    def add_arguments(parser):
+        pass
 
     def execute(self):
-        """Play next track"""
-        self.request("POST", self.URL)
-
+        self.request("POST", urljoin(self.API_PLAYER, "next"))

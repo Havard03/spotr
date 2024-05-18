@@ -1,42 +1,34 @@
 import os
+
+from ..spotr import Spotr
 from urllib.parse import urljoin
 
-class Ascii():
-    """ Ascii class """
+class Ascii(Spotr):
+    """ Ascii """
 
-    def __init__(self, spotr):
-        # Command info
-        self.info = {
-            'name': 'Ascii',
-            'description': 'Ascii image for current track',
-            'arguments': ['Width(optional)'],
-            'min_args': 0,
-            'max_args': 1,
-        }
+    description = "Ascii image for current track"
 
-        # Data URL
-        self.URL = str(urljoin(spotr.API_PLAYER, "currently-playing"))
+    def __init__(self, args):
+        self.args = args
+        Spotr.__init__(self)
 
-        # Arguments passed
-        self.args = spotr.args
+    @staticmethod
+    def add_arguments(parser):
+        parser.add_argument(
+            '-w', '--width', type=str, help="Set ascii image width"
+        ) 
 
-        # Unpack needed form spotr instance
-        self.CONFIG = spotr.CONFIG
-        self.request = spotr.request
-        self.log = spotr.log
-        self.image_to_ascii = spotr.image_to_ascii
-        self.image_to_ascii_color = spotr.image_to_ascii_color    
-
-    def execute(self, width=None):
-        """Ascii image for current track"""
-        data = self.request("GET", self.URL)
+    def execute(self):
+        data = self.request("GET", urljoin(self.API_PLAYER, "currently-playing"))
 
         if data is None or data["item"] is None:
             self.log.error("No data")
             return
         
-        if width is None:
+        if self.args.width is None:
             width, height = os.get_terminal_size()
+        else:
+            width = self.args.width
 
         ascii_str = (
             self.image_to_ascii_color(
