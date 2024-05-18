@@ -20,6 +20,10 @@ A very simple CLI for controlling your spotify on the fly in the terminal. Made 
 
 <img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/1ab68044-f134-4a78-956a-7ac5641dae1f">
 
+<h1 align="center" style="border-bottom: none">Argparser added</h1>
+
+<img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/c19ef190-7d01-4b78-9891-102efd9d61d7">
+
 <h1 align="center" style="border-bottom: none">Installation</h1>
 
 ```
