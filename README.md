@@ -51,7 +51,7 @@ $ pip install -e .
 <h1 align="center" style="border-bottom: none">Built-in Commands</h1>
 
 ascii       - Ascii image for current track <br>
-authorise   - Authenticate with Spotify API <br>
+auth        - Authenticate with Spotify API <br>
 config      - Modify config values in the terminal <br>
 current     - Display information about the current track <br>
 next        - Play next track <br>
