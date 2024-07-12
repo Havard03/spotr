@@ -37,10 +37,7 @@ $ pip install -e .
 2. Register an app in spotify for developers "https://developer.spotify.com/dashboard/applications"
    - Also set callback URI to "https://www.google.com/"
 
-3. Run any spotr command
-   - If command is not recognized, you might have to add wherever python stores packages to path, this can be different depending on OS.
-       - <strong>Linux</strong> - on linux add "~/.local/bin" to your $PATH, this can be done by adding the following line to your .rc file (export PATH="$HOME/.local/bin:$PATH")
-       - <strong>MacOs</strong> - on mac i personally fixed it by adding this to my .zshrc file (export PATH="$HOME/Library/Python/3.11/bin:$PATH") Here you have to change the python verion number accordingly
+3. Run any spotr command (If command is not recognized check if python bin is in PATH)
 
 4. You will be prompted to create config.json and paste in client and secret id from spotify app
 
@@ -50,37 +47,38 @@ $ pip install -e .
 
 <h1 align="center" style="border-bottom: none">Built-in Commands</h1>
 
-ascii       - Ascii image for current track <br>
-auth        - Authenticate with Spotify API <br>
-config      - Modify config values in the terminal <br>
-current     - Display information about the current track <br>
-next        - Play next track <br>
-playback    - Set playback state <br>
-playlist    - Choose a playlist <br>
-playlistadd - Add currently playing track to playlist <br>
-previous    - Play previous track <br>
-qsearch     - Quicksearch for tracks <br>
-queue       - Get Queue <br>
-recent      - Get recently played tracks <br>
-recommend   - Play random / recommended tracks based on recent tracks <br>
-refresh     - Refresh API key <br>
-replay      - Replay/Restart currently playing song <br>
-search      - Search for anything on spotify, Types - track, playlist, album <br>
-seek        - Seek posistion for track in seconds <br>
-shuffle     - Toggle shuffle, on / off <br>
-start       - Start/Resume playing <br>
-stop        - Stop/Pause playing <br>
-vol         - Ajust volume <br>
-volume      - Ajust volume <br>
-web         - Open currently playing track in a broswer <br>
+    auth                Authorize Spotify api
+    authorize           Authorize Spotify api
+    artist              Display artist information
+    ascii               Ascii image for current track
+    current             Display information about the currently playing track
+    next                Play next track
+    playback            Set playback state
+    playlist            Start playing one of your playlists
+    playlistadd         Add currently playing track to a playlist
+    previous            Play previous track
+    qsearch             Quicksearch for tracks
+    queue               Display current queue
+    recent              Select one of recently played tracks
+    recommend           Play random / recommended tracks based on recent tracks
+    replay              Replay/Restart currently playing track
+    search              Search for anything on spotify, Types - track, playlist, album
+    seek                Seek posistion for track (in seconds)
+    shuffle             Toggle shuffle, on / off
+    start               Start/resume playing
+    resume              Start/resume playing
+    stop                Stop/Pause playing
+    pause               Stop/Pause playing
+    volume              Ajust volume
+    vol                 Ajust volume
+    web                 Open currently playing track in a broswer
 
 <h1 align="center" style="border-bottom: none">Modifications</h1>
 <p>
 
-You can easily create your own commands by adding a file in spotrpy/commands using the example.py template.
-As soon as the file is created and saved you can run it on the terminal with (spotr command)
+Commands are declared in commands.py, Then you can set any function or class-method as callable.
 
-<h4>I recommend going to spotifys <a href="https://developer.spotify.com/console/">API documentation</a> to get a grasp of what is possible</h4>
+<h4><a href="https://developer.spotify.com/documentation/web-api">API documentation</a></h4>
 
 </p>
 
