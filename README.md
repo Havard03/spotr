@@ -18,9 +18,13 @@
 A very simple CLI for controlling your spotify on the fly in the terminal. Made in python for simplicity
 </p>
 
-<img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/1ab68044-f134-4a78-956a-7ac5641dae1f">
+<img align="center" width="100%" src="https://github.com/user-attachments/assets/24094f70-4eae-4bd6-b0ae-06e5cab82c4a">
 
-<h1 align="center" style="border-bottom: none">Argparser added</h1>
+<h1 align="center" style="border-bottom: none">Debug</h1>
+
+<img align="center" width="100%" src="https://github.com/user-attachments/assets/d53164f4-180d-4513-b2f1-0b34dd1f93bb">
+
+<h1 align="center" style="border-bottom: none">Argparser</h1>
 
 <img align="center" width="100%" src="https://github.com/Havard03/spotr/assets/58250866/c19ef190-7d01-4b78-9891-102efd9d61d7">
 
