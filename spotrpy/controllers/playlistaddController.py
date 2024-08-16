@@ -30,7 +30,7 @@ class playlistaddController(BaseController, Helpers):
 
         self.request(
             "POST",
-            str(f"{urljoin(self.API_BASE_VERSION, f"playlists/{selected}/tracks")}?{urlencode({"uris": self.current_song["item"]["uri"]})}")
+            str(f'{urljoin(self.API_BASE_VERSION, f"playlists/{selected}/tracks")}?{urlencode({"uris": self.current_song["item"]["uri"]})}')
         )
 
     def fetch(self):
