@@ -15,18 +15,20 @@ class recommendController(BaseController):
         for track in self.response["items"]:
             seed_tracks.append(track["track"]["id"])
             seed_arists.append(track["track"]["artists"][0]["id"])
+            
+        params = urlencode(
+            {
+                'seed_arists': ','.join(seed_arists),
+                'seed_generes': ','.join(seed_generes),
+                'seed_tracks': ','.join(seed_tracks),
+                'limit': 5,
+            }
+        )
 
         recommended = self.request(
             "GET",
             str(
-                f"{urljoin(self.API_BASE_VERSION, 'recommendations')}?{urlencode(
-                    {
-                        'seed_arists': ','.join(seed_arists),
-                        'seed_generes': ','.join(seed_generes),
-                        'seed_tracks': ','.join(seed_tracks),
-                        'limit': 5,
-                    }
-                )}"
+                f"{urljoin(self.API_BASE_VERSION, 'recommendations')}?{params}"
             ),
         )
         results = []

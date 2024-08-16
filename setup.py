@@ -7,7 +7,7 @@ with open("README.md", "r", encoding = "utf-8") as fh:
 
 setup(
     name='spotrpy',
-    version='4.0',
+    version='4.1',
     packages=find_packages(),
     python_requires = ">=3.6",
     author = "Havard03",
