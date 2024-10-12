@@ -18,20 +18,21 @@ class Parser(Logging):
         """ Overview of entire command execution """
 
         self.parser = argparse.ArgumentParser(description="Spotr Command Line Interface")
-        self.args()
+        self.global_args()
         self.subParsers()
         
-        super().__initLogging__(self.parsed_args)
-        self.log.debug(self.parsed_args)
+        super().__initLogging__()
+        self.log.debug(self.args)
 
         self.exec()
         self.postExec()
 
-    def args(self) -> None:
+    def global_args(self) -> None:
         """ Universal arguments  """
 
         self.parser.add_argument("-d", "--debug", help="Run in debug", action="store_true")
         self.parser.add_argument("-c", "--current", help="Run current, post exec", action="store_true")
+        self.parser.add_argument("-r", "--response", help="Dump response", action="store_true")
 
     def subParsers(self) -> None:
         """ Parse defined commands and add to ArgumentParser """
@@ -52,23 +53,23 @@ class Parser(Logging):
                         **option['kwargs']
                     )
 
-        self.parsed_args = self.parser.parse_args()
+        self.args = self.parser.parse_args()
 
     def exec(self, command=None) -> None:
         """ Command execution logic """
 
-        if command is None: command = self.parsed_args.command
+        if command is None: command = self.args.command
 
-        if self.parsed_args.command:
+        if self.args.command:
             self.log.debug(f"Executing {Command.commands[command]['callable']}")
             
             callable = Command.commands[command]['callable']
 
             if isinstance(callable, list):
-                controller = callable[0](self.parsed_args)
+                controller = callable[0](self.args)
                 getattr(controller, callable[1])()
             elif inspect.isfunction(callable):
-                Command.commands[command]['callable'](self.parsed_args)
+                Command.commands[command]['callable'](self.args)
             else:
                 self.log.error("Callable must be of type class or function")
         else:
@@ -78,6 +79,6 @@ class Parser(Logging):
     def postExec(self) -> None:
         """ Post execution logic """
 
-        if self.parsed_args.current: self.exec("current")
+        if self.args.current: self.exec("current")
 
 

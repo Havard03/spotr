@@ -12,7 +12,7 @@ class BaseController(Logging, Config, API):
     def __init__(self, args):
         self.args = args
 
-        self.__initLogging__(args)
+        self.__initLogging__()
         self.log.debug("[green]BaseController initialized [purple]Logging")
 
         self.__initConfig__()

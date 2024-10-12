@@ -45,6 +45,9 @@ class API():
         except ValueError:
             data = None
 
+        if self.args.response:
+            self.log.info(data)
+
         return data
 
     def __refresh_token(self):
