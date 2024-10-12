@@ -10,11 +10,11 @@ from rich.logging import RichHandler
 class Logging:
     """ Logging """
 
-    def __initLogging__(self, args):
+    def __initLogging__(self):
         self.log = logging.getLogger()
         self.console = Console()
 
-        if args.debug:
+        if self.args.debug:
             logging.basicConfig(
                 level="NOTSET",
                 format="%(message)s",
