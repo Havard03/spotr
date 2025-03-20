@@ -18,11 +18,11 @@ setup(
     url = "https://github.com/Havard03/spotr",
     keywords = 'cli',
     install_requires=[
-        'Pillow==10.1.0',
-        'questionary==2.0.1',
-        'requests==2.28.1',
-        'rich==13.6.0',
-        'tqdm==4.66.1',
+        'Pillow',
+        'questionary',
+        'requests',
+        'rich',
+        'tqdm',
     ],
     entry_points={
         'console_scripts': [
