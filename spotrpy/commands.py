@@ -21,6 +21,8 @@ from spotrpy.controllers.playlistController import playlistController
 from spotrpy.controllers.playlistaddController import playlistaddController
 from spotrpy.controllers.authController import authController
 from spotrpy.controllers.currentController import currentController
+from spotrpy.controllers.devicesController import DevicesController
+from spotrpy.controllers.configController import ConfigController
 
 Command = Command()
 
@@ -84,10 +86,15 @@ Command.command(["seek"], "Seek posistion for track (in seconds)", [seekControll
 Command.command(["shuffle"], "Toggle shuffle, on / off", [shuffleController, "run"], options=[
     {'flags': ['-s', '--state'], 'kwargs': {'type': str, 'choices': ['true', 'false'], 'help': 'Toggle shuffle'}}
 ])
-Command.command(["start", "resume"], "Start/resume playing", [startController, "run"])
 Command.command(["stop", "pause"], "Stop/Pause playing", [stopController, "run"])
+Command.command(["start", "resume"], "Start/resume playing", [startController, "run"])
 Command.command(["volume", "vol"], "Ajust volume", [volumeController, "run"], options=[
     {'flags': ['-p', '--percentage'], 'kwargs': {'type': str, 'help': 'Volume percentage'}}
 ])
 Command.command(["web"], "Open currently playing track in a broswer", [webController, "run"])
+Command.command(["device"], "Display available devices", [DevicesController, "run"])
+Command.command(["config"], "Config information", [ConfigController, "run"], options=[
+    {'flags': ['list'], 'kwargs': {'type': str, 'choices': ['all', 'secret'], 'help': 'List config values'}},
+])
+Command.command(["currentmode"], "Display track information in a loop until aborted, refreshes information every 5 seconds", [currentController, "idle"])
 

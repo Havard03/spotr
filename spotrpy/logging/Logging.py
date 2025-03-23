@@ -2,6 +2,7 @@ import logging
 
 from rich.console import Console
 from rich.logging import RichHandler
+from rich.prompt import Confirm
 
 """
     Universal logging config
@@ -10,9 +11,11 @@ from rich.logging import RichHandler
 class Logging:
     """ Logging """
 
-    def __initLogging__(self):
+    def __init__(self, args):
         self.log = logging.getLogger()
         self.console = Console()
+        self.confirm = Confirm()
+        self.args = args
 
         if self.args.debug:
             logging.basicConfig(

@@ -19,9 +19,8 @@ class Parser(Logging):
 
         self.parser = argparse.ArgumentParser(description="Spotr Command Line Interface")
         self.global_args()
-        self.subParsers()
+        super().__init__(self.subParsers())
         
-        super().__initLogging__()
         self.log.debug(self.args)
 
         self.exec()
@@ -53,7 +52,7 @@ class Parser(Logging):
                         **option['kwargs']
                     )
 
-        self.args = self.parser.parse_args()
+        return self.parser.parse_args()
 
     def exec(self, command=None) -> None:
         """ Command execution logic """

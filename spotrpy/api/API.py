@@ -4,58 +4,71 @@ import requests
 
 from urllib.parse import urljoin
 
-class API():
-    """ API """
+from spotrpy.config.config import Config
 
-    def __initAPI__(self):
-        self.SPOTIFY_LIMIT      = 50
-        self.QUSTIONARY_LIMIT   = 36
-        self.API_VERSION        = "v1"
-        self.API_BASE           = "api.spotify.com"
-        self.ACCOUNT_URL        = "https://accounts.spotify.com" 
-        self.API_PLAYER         = urljoin("https://api.spotify.com", f"{self.API_VERSION}/me/player/")
-        self.API_BASE_VERSION   = urljoin("https://api.spotify.com", f"{self.API_VERSION}/")
 
-    def request(
-        self, 
-        method,
-        url,
-        headers=None,
-        json=None
-    ):
-        """ Spotify API request """
+class API(Config):
+    """API"""
 
-        if headers is None: headers = {"Authorization": f"Bearer {self.CONFIG['key']}"}
-        
-        response = requests.request(method, url, headers=headers, json=json, timeout=10)
+    def __init__(self, args):
+        super().__init__(args)
 
+        self.SPOTIFY_LIMIT = 50
+        self.QUSTIONARY_LIMIT = 36
+        self.API_VERSION = "v1"
+        self.API_BASE = "api.spotify.com"
+        self.ACCOUNT_URL = "https://accounts.spotify.com"
+        self.API_PLAYER = urljoin(
+            "https://api.spotify.com", f"{self.API_VERSION}/me/player/"
+        )
+        self.API_BASE_VERSION = urljoin(
+            "https://api.spotify.com", f"{self.API_VERSION}/"
+        )
+
+    def ping(self):
+        response = requests.request(
+            "GET",
+            urljoin(self.API_BASE_VERSION, "me"),
+            headers={"Authorization": f"Bearer {self.CONFIG['key']}"},
+            timeout=10,
+        )
         if not response.ok:
-            status_code = response.status_code
+            self._refresh_token()
 
-            self.log.error(f"Requst error - {status_code}")
+    def request(self, method, url, json=None):
+        """Spotify API request"""
 
-            if status_code in (401, 400):                
-                self.__refresh_token()
-                
-                headers     = {"Authorization": f"Bearer {self.CONFIG['key']}"}
-                response    = requests.request(method, url, headers=headers, json=json, timeout=10)
-
-        try:
-            data = response.json()
-        except ValueError:
-            data = None
+        self.ping()
+        headers = {"Authorization": f"Bearer {self.CONFIG['key']}"}
+        response = requests.request(method, url, headers=headers, json=json, timeout=10)
+        self.log.debug(response.headers.get("content-type"))
 
         if self.args.response:
-            self.log.info(data)
+            self.log.info(response)
+            (
+                self.log.info(response.json())
+                if "application/json" in response.headers.get("content-type", "")
+                else self.log.info("No response data")
+            )
+
+        if not response.ok:
+            self.log.error("Request error: ", response)
+            sys.exit()
+
+        data = (
+            response.json()
+            if "application/json" in response.headers.get("content-type", "")
+            else None
+        )
 
         return data
 
-    def __refresh_token(self):
-        """ Refresh Spotify API token """
+    def _refresh_token(self):
+        """Refresh Spotify API token"""
 
         self.log.debug(f"Refreshing API-Token")
         url = urljoin(self.ACCOUNT_URL, "api/token")
-        
+
         response = requests.post(
             url,
             data={
@@ -67,8 +80,16 @@ class API():
         )
 
         if not response.ok:
-            self.log.critical(f"Request error - status-code: {response.status_code}")
-            self.log.critical("Indication of invalid refresh_token, or base_64")
+            self.log.critical("Error fetching auth token")
+            self.log.info(response)
+            (
+                self.log.info(response.json())
+                if "application/json" in response.headers.get("content-type", "")
+                else ""
+            )
+
+            if self.confirm.ask("Start auth process?"):
+                self.authorize()
 
             sys.exit()
 
@@ -76,14 +97,16 @@ class API():
         self.CONFIG["key"] = data["access_token"]
         self.write_config()
 
-    def authorise(self, client_id=None, client_secret=None):
-        """ Authorise CLI with Spotify API """
+    def authorize(self, client_id=None, client_secret=None):
+        """Authorise CLI with Spotify API"""
 
-        auth_url  = urljoin(self.ACCOUNT_URL, "authorize")
+        auth_url = urljoin(self.ACCOUNT_URL, "authorize")
         token_url = urljoin(self.ACCOUNT_URL, "api/token")
 
-        if not client_id: client_id         = str(input("Spotify-App Client id: "))
-        if not client_secret: client_secret = str(input("Spotify-App Client secret: "))
+        if not client_id:
+            client_id = str(input("Spotify-App Client id: "))
+        if not client_secret:
+            client_secret = str(input("Spotify-App Client secret: "))
 
         auth_request = requests.get(
             auth_url,
@@ -96,12 +119,14 @@ class API():
             timeout=10,
         )
 
-        print("\nGo to the Following URL, Accept the terms, Copy the code in the redirected URL, Then paste the code into the terminal\n")
+        print(
+            "\nGo to the Following URL, Accept the terms, Copy the code in the redirected URL, Then paste the code into the terminal\n"
+        )
         print(f"\n{auth_request.url}\n")
 
-        auth_code           = str(input("Enter code from the URL: "))
-        client_creds        = f"{client_id}:{client_secret}"
-        client_creds_b64    = base64.b64encode(client_creds.encode())
+        auth_code = str(input("Enter code from the URL: "))
+        client_creds = f"{client_id}:{client_secret}"
+        client_creds_b64 = base64.b64encode(client_creds.encode())
 
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -121,9 +146,9 @@ class API():
             self.log.warning("Request error: %d", access_token_request.status_code)
             sys.exit()
 
-        access_token_response_data      = access_token_request.json()
-        self.CONFIG["refresh_token"]    = access_token_response_data["refresh_token"]
-        self.CONFIG["base_64"]          = client_creds_b64.decode()
+        access_token_response_data = access_token_request.json()
+        self.CONFIG["refresh_token"] = access_token_response_data["refresh_token"]
+        self.CONFIG["base_64"] = client_creds_b64.decode()
 
         self.write_config()
         print("All done!")

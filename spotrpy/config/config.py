@@ -2,10 +2,16 @@ import os
 import sys
 import json
 
-class Config():
+from spotrpy.logging.Logging import Logging
+
+class Config(Logging):
     """ Config """
 
-    def __initConfig__(self):
+    def __init__(self, args):
+        super().__init__(args)
+        self.readConfig()
+
+    def readConfig(self):
         try:
             with open(
                 os.path.join(
@@ -18,8 +24,7 @@ class Config():
                 self.validate_config()
         except FileNotFoundError:
             self.log.critical("Config file not found")
-            create_file = str(input("Create config? y/n: "))
-            if create_file.lower() == "y":
+            if self.confirm.ask("Create new config file?"):
                 self.CONFIG = {
                     "path": os.path.dirname(os.path.realpath(__file__)),
                     "refresh_token": "",
