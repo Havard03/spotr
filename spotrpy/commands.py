@@ -97,4 +97,7 @@ Command.command(["config"], "Config information", [ConfigController, "run"], opt
     {'flags': ['list'], 'kwargs': {'type': str, 'choices': ['all', 'secret'], 'help': 'List config values'}},
 ])
 Command.command(["currentmode"], "Display track information in a loop until aborted, refreshes information every 5 seconds", [currentController, "idle"])
+Command.command(["asciimode"], "Display ascii image for current track in a loop, refresh every 5 seconds", [asciiController, "idle"], options=[
+    {'flags': ['-w', '--width'], 'kwargs': {'type': str, 'help': 'Set ascii image width'}}
+])
 

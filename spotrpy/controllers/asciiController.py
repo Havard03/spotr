@@ -1,5 +1,4 @@
-import os
-import sys
+import os,sys,time
 from urllib.parse import urljoin
 
 from spotrpy.core.BaseController import BaseController
@@ -33,3 +32,20 @@ class asciiController(BaseController, ASCII):
         if self.response is None or self.response["item"] is None:
             self.log.error("No data")
             sys.exit()
+            
+    def idle(self):
+        self.run()
+        id = self.response['item']['id']
+        try:
+            while True:
+                self.fetch()
+                
+                if not id == self.response['item']['id']:
+                    print("\033c")
+                    self.run()
+                    id = self.response['item']['id']
+            
+                time.sleep(5)
+        except KeyboardInterrupt:
+            sys.exit()
+
